@@ -215,25 +215,158 @@ let pendingEnrollCourseId = null;
 // Lessons Store (Populated dynamically with verified syllabus videos)
 const COURSE_LESSONS = {};
 
-// Quizzes Store
+// Quizzes Store - In-Depth Technical Assessment Bank
 const QUIZZES = {
-    11: {
+    1: {
         id: 1,
-        title: "Java Basics & Enterprise Fundamentals",
+        title: "Verilog HDL & RTL Architecture Assessment",
         questions: [
-            { id: 1, q: "Which keyword is used to create a class in Java?", options: ["method", "class", "function", "object"], ans: 1, exp: "The 'class' keyword is used to declare a class definition in Java." },
-            { id: 2, q: "Which collection class maintains unique elements without guaranteed order?", options: ["ArrayList", "LinkedList", "HashSet", "Vector"], ans: 2, exp: "HashSet stores only unique elements backed by a hash table." },
-            { id: 3, q: "What is the return type of Stream.filter() in Java?", options: ["boolean", "List", "Stream", "Optional"], ans: 2, exp: "Stream.filter() returns an intermediate Stream object." },
-            { id: 4, q: "Which annotation marks a class as a RESTful web controller?", options: ["@Controller", "@RestController", "@Service", "@Repository"], ans: 1, exp: "@RestController combines @Controller and @ResponseBody." }
+            { id: 1, q: "Which assignment operator MUST be used for synchronous edge-triggered registers in Verilog to avoid race conditions?", options: ["=", "<=", ":=", "=="], ans: 1, exp: "Non-blocking assignment '<=' ensures concurrent register updates and prevents simulator event evaluation races." },
+            { id: 2, q: "What does always @(*) signify in modern Verilog (Verilog-2001)?", options: ["Triggers exclusively on posedge clk", "Automatically infers complete combinational sensitivity list to avoid latches", "Forces the synthesis tool to create a latch", "Executes only once at simulation time zero"], ans: 1, exp: "@(*) automatically adds all RHS and condition signals to the sensitivity list, eliminating accidental latches." },
+            { id: 3, q: "In a Moore Finite State Machine, what do the outputs depend upon?", options: ["Current state and current inputs", "Current state only", "Inputs only asynchronously", "Clock frequency only"], ans: 1, exp: "In a Moore machine, outputs are strictly a function of the current state, whereas Mealy outputs depend on current state and inputs." },
+            { id: 4, q: "What hardware element is unintentionally synthesized if an if-else or case statement in a combinational block is incomplete?", options: ["Tristate buffer", "Unwanted transparent latch", "D flip-flop", "Pull-up resistor"], ans: 1, exp: "Incomplete combinational assignments force synthesis tools to infer memory (transparent latches) to preserve unassigned states." },
+            { id: 5, q: "When designing an asynchronous FIFO, why is Gray code encoding used for read and write pointers crossing clock domains?", options: ["It consumes fewer flip-flops", "Only a single bit transitions at any given count, preventing multi-bit CDC glitches", "It is easier to increment with standard binary adders", "It operates at double the clock frequency"], ans: 1, exp: "Gray code ensures that only one bit changes per clock cycle, preventing multi-bit metastability glitches across CDC synchronizers." },
+            { id: 6, q: "What is the primary cause of simulation-synthesis mismatches when using blocking assignments (=) in sequential blocks?", options: ["Clock skew", "Race conditions depending on simulator execution order", "Setup time violations", "Floating inputs"], ans: 1, exp: "Using blocking assignments in sequential blocks creates simulator evaluation race conditions between flip-flops." }
         ]
     },
-    1: {
+    2: {
         id: 2,
-        title: "Verilog RTL Design Assessment",
+        title: "SystemVerilog & Functional Verification Assessment",
         questions: [
-            { id: 1, q: "Which assignment operator MUST be used for synchronous edge-triggered registers in Verilog?", options: ["=", "<=", ":=", "=="], ans: 1, exp: "Non-blocking assignment '<=' ensures concurrent register updates." },
-            { id: 2, q: "What does always @(*) signify in modern Verilog?", options: ["Trigger every clock", "Trigger on any input signal change in the block", "Trigger on reset", "Never trigger"], ans: 1, exp: "@(*) automatically includes all read signals in combinational sensitivity." },
-            { id: 3, q: "In a Moore FSM, what do the outputs depend upon?", options: ["Current state and inputs", "Current state only", "Inputs only", "Clock frequency only"], ans: 1, exp: "In a Moore machine, outputs depend purely on the current state." }
+            { id: 1, q: "What is the key difference between logic and wire in SystemVerilog?", options: ["logic can have multiple drivers whereas wire cannot", "logic can be driven by a single procedural block or continuous assignment; wire supports multiple net drivers (resolution)", "logic is only 1-bit; wire is always multi-bit", "logic cannot be used inside functions"], ans: 1, exp: "logic is a 4-state datatype with single-driver checking; wire is required for resolved multi-driver busses." },
+            { id: 2, q: "How does a mailbox differ from a queue in SystemVerilog verification?", options: ["Mailboxes are built-in primitives without methods", "Mailboxes provide thread-safe inter-process synchronization with blocking put() and get()", "Queues cannot store objects", "Mailboxes have unbounded size only"], ans: 1, exp: "SystemVerilog mailboxes provide built-in blocking synchronization (put() blocks if full, get() blocks if empty) between concurrent threads." },
+            { id: 3, q: "What keyword or method is used in SystemVerilog to selectively disable a specific constraint?", options: ["constraint_mode(0)", "enable_constraint", "soft constraint", "rand_mode(0)"], ans: 0, exp: "obj.c_name.constraint_mode(0) turns off constraint c_name, while obj.rand_mode(0) disables randomization for variables." },
+            { id: 4, q: "In functional coverage, what does cross coverage (cross) measure?", options: ["Coverage across two different simulators", "Simultaneous combination of values between two or more coverpoints", "Cross-talk between adjacent metal layers", "Code line execution frequency"], ans: 1, exp: "Cross coverage measures the intersection of bins from two or more coverpoints to verify interactive corner cases." },
+            { id: 5, q: "In SystemVerilog Assertions (SVA), what does the non-overlapped implication operator |=> mean?", options: ["If antecedent holds at clock N, consequent must hold at clock N", "If antecedent holds at clock N, consequent must hold at clock N+1", "Consequent holds 5 cycles later", "Antecedent and consequent execute simultaneously"], ans: 1, exp: "|=> is non-overlapped implication: when antecedent is true on clock cycle N, consequent is evaluated on cycle N+1." },
+            { id: 6, q: "What is the purpose of declaring a method as virtual in a SystemVerilog base class?", options: ["It prevents the method from being overridden", "It enables dynamic polymorphism so derived class implementations are called via base handles", "It executes the method in zero simulation time", "It compiles the method in C++ via DPI"], ans: 1, exp: "virtual enables late binding (polymorphism), allowing child class overrides to execute when accessed via parent handles." }
+        ]
+    },
+    3: {
+        id: 3,
+        title: "UVM Methodology & Testbench Architecture Assessment",
+        questions: [
+            { id: 1, q: "In what order do UVM build_phase and connect_phase execute across the component hierarchy?", options: ["Both top-down", "build_phase is top-down; connect_phase is bottom-up", "build_phase is bottom-up; connect_phase is top-down", "Both execute in parallel"], ans: 1, exp: "build_phase executes top-down so parents configure children; connect_phase executes bottom-up so lower ports connect upward." },
+            { id: 2, q: "Which UVM component is responsible for converting high-level sequence items into pin-level signal toggles for the DUT?", options: ["uvm_monitor", "uvm_sequencer", "uvm_driver", "uvm_scoreboard"], ans: 2, exp: "The uvm_driver pulls transaction items from the sequencer and drives physical pin-level transitions on the virtual interface." },
+            { id: 3, q: "What is the primary benefit of the UVM Factory pattern (set_type_override_by_type)?", options: ["Faster Verilator compilation", "Replacing a component or transaction type with a specialized subtype without editing original testbench code", "Automatic clock generation", "Exporting testbenches to VHDL"], ans: 1, exp: "UVM Factory overrides allow tests to substitute customized drivers, sequences, or scoreboards without modifying the existing topology." },
+            { id: 4, q: "How does a uvm_monitor pass captured transactions to scoreboards and coverage collectors without tight coupling?", options: ["Global static pointers", "TLM Analysis Ports (uvm_analysis_port) using broadcast write() calls", "Direct class inheritance", "File system shared memory"], ans: 1, exp: "uvm_analysis_port implements the Observer pattern, broadcasting transaction snapshots via write() to any number of subscribers." },
+            { id: 5, q: "What is the role of the UVM Register Abstraction Layer (RAL)?", options: ["Synthesizes Verilog logic gates", "Provides a standardized object-oriented mirror of hardware registers with automatic frontdoor and backdoor reads/writes", "Calculates static timing slack", "Generates pin layouts"], ans: 1, exp: "UVM RAL maintains a frontdoor/backdoor mirrored register model that verifies hardware register fields, resets, and access permissions." },
+            { id: 6, q: "Which macro is required to register a UVM component class with the factory?", options: ["`uvm_object_utils", "`uvm_component_utils", "`uvm_factory_register", "`uvm_phase_register"], ans: 1, exp: "`uvm_component_utils(my_class) registers structural components inheriting from uvm_component with the factory." }
+        ]
+    },
+    4: {
+        id: 4,
+        title: "Physical Design & Static Timing Analysis (STA) Assessment",
+        questions: [
+            { id: 1, q: "What is the fundamental condition to avoid Setup Time violation on a synchronous data path?", options: ["T_clk2q + T_comb + T_setup <= T_period + T_skew", "T_clk2q + T_comb >= T_hold + T_skew", "T_period <= T_setup - T_hold", "T_skew >= T_period"], ans: 0, exp: "For setup time, data must arrive before the capturing edge by at least T_setup: Arrival Time <= Required Time." },
+            { id: 2, q: "Can a Hold Time violation be fixed by slowing down the clock frequency?", options: ["Yes, increasing clock period always fixes hold violations", "No, hold time is clock frequency independent and depends only on minimum path delay and skew", "Yes, if using double data rate", "Only on negative edge registers"], ans: 1, exp: "Hold time is completely independent of clock period. It must be fixed by adding data path buffers/delay cells." },
+            { id: 3, q: "What is the primary purpose of Clock Tree Synthesis (CTS) in physical design?", options: ["To minimize logic gate count", "To balance clock insertion delay and minimize clock skew across all sequential elements", "To route power and ground meshes", "To generate DRC clean metal fills"], ans: 1, exp: "CTS inserts buffers/inverters to ensure clock edges arrive at all flip-flops with minimal skew and balanced insertion delay." },
+            { id: 4, q: "What does WNS (Worst Negative Slack) < 0ps indicate in STA signoff?", options: ["The design has timing violations and fails sign-off", "The design is over-constrained but safe", "The design runs at infinite frequency", "The power mesh has IR drop"], ans: 0, exp: "A negative slack (WNS < 0ps) means the data signal arrives too late, resulting in a timing failure." },
+            { id: 5, q: "What is On-Chip Variation (OCV) derating used for in PrimeTime?", options: ["To account for fabrication process, voltage, and temperature variations across different regions of the die", "To reduce chip area", "To test analog ADC converters", "To measure PCB trace impedance"], ans: 0, exp: "OCV derating factors model intra-die PVT variations by speeding up clock and slowing down data (or vice versa) for pessimistic timing checks." },
+            { id: 6, q: "What is the purpose of High Fanout Net Synthesis (HFNS)?", options: ["Routing clock trees only", "Buffering reset, scan-enable, and high-fanout control signals to prevent transition slew degradation", "Connecting power pads to standard cell rails", "Optimizing memory bit-cells"], ans: 1, exp: "HFNS buffers high-fanout control nets (reset, scan enable) during placement to fix max capacitance and transition slew violations." }
+        ]
+    },
+    5: {
+        id: 5,
+        title: "Design for Testability (DFT) & Scan Testing Assessment",
+        questions: [
+            { id: 1, q: "What does a Stuck-At-0 (SA0) fault model represent?", options: ["A clock signal running at 0 MHz", "A physical defect causing a circuit node or pin to remain permanently tied to logic 0", "A soft error caused by cosmic radiation", "A hold time violation"], ans: 1, exp: "The classical stuck-at fault models a node permanently connected to ground (SA0) or VDD (SA1)." },
+            { id: 2, q: "What modification transforms a standard D flip-flop into a Muxed-D Scan Flip-Flop?", options: ["An XOR gate on the clock pin", "A 2-to-1 multiplexer on the D input controlled by a Scan Enable (SE) signal", "A tri-state buffer on the Q output", "A dual-port RAM register"], ans: 1, exp: "A 2:1 mux selects functional data D when SE=0 and scan test input SI when SE=1." },
+            { id: 3, q: "How many mandatory pins are required by the IEEE 1149.1 JTAG Test Access Port (TAP)?", options: ["2 pins (SDA, SCL)", "4 pins: TCK, TMS, TDI, TDO (with optional TRST*)", "8 pins for parallel bus", "1 pin wireless"], ans: 1, exp: "IEEE 1149.1 TAP defines 4 mandatory pins (TCK, TMS, TDI, TDO) plus an optional asynchronous reset (TRST*)." },
+            { id: 4, q: "What test algorithm is most widely used in Memory BIST (MBIST) to detect pattern sensitivity and coupling faults?", options: ["Bubble Sort test", "March Tests (e.g., March C-, March C+)", "Dijkstra scan", "Fast Fourier Transform"], ans: 1, exp: "March algorithms (such as March C-) write and read finite sequences of 0s and 1s in ascending and descending address order." },
+            { id: 5, q: "What is the primary role of an ATPG tool in DFT?", options: ["To synthesize RTL into gate netlists", "To mathematically generate deterministic test vectors that achieve high manufacturing fault coverage", "To route metal wires on silicon", "To optimize dynamic power dissipation"], ans: 1, exp: "ATPG tools automatically generate compact test vector sets for high manufacturing fault coverage." },
+            { id: 6, q: "What is the key difference between Stuck-At testing and At-Speed Transition Delay testing?", options: ["Stuck-At tests static DC continuity; Transition Delay tests dynamic switching speeds at rated system clock frequencies", "Stuck-At is faster to simulate", "Transition testing is only for analog circuits", "They are identical in fault coverage"], ans: 0, exp: "At-Speed testing uses launch-and-capture clock pulses to catch timing defects, resistive vias, and slow-to-rise/fall nodes." }
+        ]
+    },
+    6: {
+        id: 6,
+        title: "ASIC Design Flow & SoC Architecture Assessment",
+        questions: [
+            { id: 1, q: "In the ASIC design flow, what tool translates register-transfer level (RTL) code into technology-specific gate-level netlists?", options: ["Logic Synthesizer (e.g. Synopsys DC)", "Layout Editor", "C Compiler", "DRC Verifier"], ans: 0, exp: "Logic synthesis maps behavioral RTL into target standard cell gate libraries under timing, area, and power constraints." },
+            { id: 2, q: "What does Formal Equivalence Checking (LEC/Formality) verify?", options: ["That chip package pins match the PCB", "Mathematical functional equivalence between RTL and gate-level netlist without vector simulations", "Thermal gradient across silicon die", "Clock skew balance"], ans: 1, exp: "Formal equivalence mathematically proves that synthesized or modified netlists match the reference RTL logic without test patterns." },
+            { id: 3, q: "What format standard is used to specify low-power power domains, isolation cells, and level shifters?", options: ["UPF (Unified Power Format) / CPF", "JPEG", "JSON", "ASCII"], ans: 0, exp: "IEEE 1801 UPF (Unified Power Format) standardizes power management intent across EDA tools." },
+            { id: 4, q: "What is the final database format sent to semiconductor foundries for mask fabrication?", options: ["GDSII / OASIS", "PDF", "Verilog Netlist", "CSV"], ans: 0, exp: "GDSII (and modern OASIS) is the industry standard binary stream format representing silicon layout geometric shapes." },
+            { id: 5, q: "What does DRC (Design Rule Check) test for?", options: ["Logic syntax errors", "Physical layout violations of foundry manufacturing limits (min width, min spacing, enclosure)", "Microcontroller firmware bugs", "Setup time slack"], ans: 1, exp: "DRC verifies that geometric layout shapes obey foundry semiconductor manufacturing tolerances." }
+        ]
+    },
+    7: {
+        id: 7,
+        title: "Digital Electronics & CMOS Fundamentals Assessment",
+        questions: [
+            { id: 1, q: "In a symmetric CMOS inverter, why is PMOS transistor width typically 2 to 3 times wider than NMOS width?", options: ["PMOS has higher threshold voltage", "Hole mobility in PMOS silicon is 2 to 3 times lower than electron mobility in NMOS", "PMOS conducts higher leakage current", "To minimize gate capacitance"], ans: 1, exp: "Because electron mobility (NMOS) is roughly 2.5x hole mobility (PMOS), PMOS width is sized up to balance rise and fall propagation delays." },
+            { id: 2, q: "What is the formula for dynamic power dissipation in a CMOS digital gate?", options: ["P_dyn = alpha * C_L * V_DD^2 * f_clk", "P_dyn = I_leak * V_DD", "P_dyn = V_DD / R_on", "P_dyn = C_L * f_clk"], ans: 0, exp: "Dynamic power is proportional to switching activity (alpha), load capacitance (C_L), square of supply voltage (V_DD^2), and clock frequency (f)." },
+            { id: 3, q: "What is the switching threshold voltage V_M of a CMOS inverter?", options: ["The voltage where input equals output (V_in = V_out)", "0 Volts", "Supply voltage V_DD", "Threshold voltage V_tn"], ans: 0, exp: "The switching threshold V_M is the intersection of the voltage transfer curve (VTC) with the line V_in = V_out." },
+            { id: 4, q: "Why is a transmission gate built using complementary NMOS and PMOS transistors in parallel?", options: ["To invert the signal", "NMOS passes a strong logic 0 but weak logic 1, while PMOS passes a strong logic 1 but weak logic 0; together they pass rail-to-rail signals", "To store charge dynamically", "To increase propagation delay"], ans: 1, exp: "Pairing NMOS and PMOS in parallel eliminates threshold drop degradation for both logic 0 and logic 1." },
+            { id: 5, q: "What causes metastability in digital flip-flops?", options: ["Input data transitioning inside the setup or hold time aperture window of the clock edge", "Using too much power", "Overheating the heatsink", "Ground bounce only"], ans: 0, exp: "Violating setup or hold timing causes internal cross-coupled inverters to hover between logic levels for an unpredictable duration." }
+        ]
+    },
+    8: {
+        id: 8,
+        title: "FPGA Design with Xilinx Vivado Assessment",
+        questions: [
+            { id: 1, q: "What is the fundamental combinational building block inside an FPGA Configurable Logic Block (CLB)?", options: ["Operational amplifier", "Look-Up Table (LUT)", "Inductive choke", "Schmitt trigger"], ans: 1, exp: "Modern FPGAs implement combinational truth tables using SRAM-based Look-Up Tables (e.g. 6-input LUTs in Xilinx 7-series/Ultrascale)." },
+            { id: 2, q: "Which file format specifies physical pin locations and timing constraints in Xilinx Vivado?", options: ["XDC (Xilinx Design Constraints)", "Makefile", "XML", "JSON"], ans: 0, exp: "Vivado uses .xdc files, based on standard SDC (Synopsys Design Constraints) syntax, for pin placements and clock definitions." },
+            { id: 3, q: "What is the Integrated Logic Analyzer (ILA) core used for in Vivado?", options: ["Synthesizing Verilog code", "Real-time in-system hardware logic signal capture directly over the JTAG cable", "Power distribution simulation", "PCB thermal routing"], ans: 1, exp: "The Xilinx ILA IP core samples internal FPGA net transitions into on-chip Block RAM and streams waveforms to Vivado via JTAG." },
+            { id: 4, q: "What hardware resource in FPGAs is dedicated to high-speed multiplication and MAC (Multiply-Accumulate) operations?", options: ["DSP Slices (e.g. DSP48E)", "Carry chains only", "I/O Buffers", "Clock managers"], ans: 0, exp: "FPGA DSP slices provide dedicated hard silicon multipliers and accumulators optimized for DSP algorithms and filtering." },
+            { id: 5, q: "What is the difference between Block RAM (BRAM) and Distributed RAM in FPGAs?", options: ["BRAM uses dedicated on-chip dual-port memory blocks; Distributed RAM repurposes LUT SRAM", "BRAM is off-chip only", "Distributed RAM cannot be written to", "BRAM only stores 1 byte"], ans: 0, exp: "Block RAM provides large dedicated multi-kilobit dual-port memories, while Distributed RAM uses the SLICEM LUT cells." }
+        ]
+    },
+    9: {
+        id: 9,
+        title: "Tcl & Python EDA Automation Assessment",
+        questions: [
+            { id: 1, q: "In EDA Tcl scripting, what does the get_timing_paths command return?", options: ["A text string", "A collection object representing timing path data structures", "A Boolean true/false", "An integer count only"], ans: 1, exp: "EDA tools represent design entities as collections; get_timing_paths returns a pointer collection of timing path handles." },
+            { id: 2, q: "Which Tcl command is used to iterate over a Synopsys/Cadence EDA collection?", options: ["foreach_in_collection", "while loop", "for loop only", "eval_map"], ans: 0, exp: "foreach_in_collection is the standard EDA Tcl construct for traversing collections of pins, nets, cells, or timing paths." },
+            { id: 3, q: "In Python, which module is standard for parsing complex EDA log files and extracting timing slacks with regular expressions?", options: ["re", "os", "sys", "math"], ans: 0, exp: "The 're' (regular expression) module is standard for pattern matching and extracting slacks from EDA log and timing reports." },
+            { id: 4, q: "In Tcl, what is the syntax to evaluate an expression arithmetic operation?", options: ["expr {10 + 20}", "calc(10 + 20)", "eval 10 + 20", "math 10 + 20"], ans: 0, exp: "The expr command in Tcl evaluates mathematical and logical expressions." },
+            { id: 5, q: "Why is Python widely preferred over shell scripts for modern VLSI regression orchestration?", options: ["Python requires no compiler", "Python offers rich JSON/YAML parsing, multi-process management, and data analysis libraries like Pandas", "Python runs faster than pure C netlists", "Python eliminates EDA tool license costs"], ans: 1, exp: "Python provides robust data handling, process pooling, and structured logging ideal for automated verification pipelines." }
+        ]
+    },
+    10: {
+        id: 10,
+        title: "C Systems Programming & Embedded Architecture Assessment",
+        questions: [
+            { id: 1, q: "What is the size of any pointer type (e.g. int*, char*) on a 64-bit architecture?", options: ["2 bytes", "4 bytes", "8 bytes", "Depends on the data type pointed to"], ans: 2, exp: "On 64-bit architectures, memory addresses are 64 bits wide, meaning all pointers occupy 8 bytes." },
+            { id: 2, q: "Which bitwise expression clears (sets to 0) bit 3 of an integer variable reg without altering other bits?", options: ["reg |= (1 << 3);", "reg &= ~(1 << 3);", "reg ^= (1 << 3);", "reg = reg >> 3;"], ans: 1, exp: "~(1 << 3) creates a bitmask where bit 3 is 0 and all other bits are 1; bitwise AND clears bit 3." },
+            { id: 3, q: "What happens when dynamically allocated heap memory via malloc() is never freed before pointer reassignment?", options: ["Automatic garbage collection cleans it", "A memory leak occurs, consuming heap memory until system exhaustion", "Segmentation fault immediately", "Stack overflow"], ans: 1, exp: "C has no automatic garbage collector; orphaned heap allocations cause memory leaks." },
+            { id: 4, q: "What does the volatile keyword inform the C compiler regarding an embedded peripheral register?", options: ["Cache the variable inside CPU register", "Do not optimize away memory reads/writes, as the value can change outside program flow", "Make the variable read-only", "Place the variable on stack"], ans: 1, exp: "volatile ensures the compiler generates fresh memory reads/writes every access, crucial for hardware memory-mapped registers." },
+            { id: 5, q: "What is the consequence of dereferencing a dangling or NULL pointer in C?", options: ["Returns 0 cleanly", "Undefined behavior, typically resulting in a SIGSEGV segmentation fault", "Throws NullPointerException", "Compile time warning only"], ans: 1, exp: "Dereferencing invalid memory addresses is undefined behavior and crashes the program with a segmentation fault." },
+            { id: 6, q: "What is the primary function of header guards (#ifndef HEADER_H ... #endif) in C?", options: ["To speed up execution", "To prevent duplicate definitions and re-declaration errors when a header is included multiple times", "To link static libraries", "To protect against buffer overflows"], ans: 1, exp: "Header guards ensure each header file is parsed only once per translation unit." }
+        ]
+    },
+    11: {
+        id: 11,
+        title: "Java Full Stack Enterprise & Spring Boot Assessment",
+        questions: [
+            { id: 1, q: "What is the time complexity difference between ArrayList and LinkedList when retrieving elements by index?", options: ["ArrayList is O(1) random access; LinkedList is O(n) sequential traversal", "LinkedList is O(1); ArrayList is O(n)", "Both are O(log n)", "LinkedList uses less memory per element"], ans: 0, exp: "ArrayList uses a contiguous internal array allowing O(1) indexing, whereas LinkedList must traverse node pointers in O(n) time." },
+            { id: 2, q: "Which Spring Boot annotation marks a class as a RESTful web controller returning JSON response bodies?", options: ["@Controller", "@RestController", "@Service", "@Repository"], ans: 1, exp: "@RestController combines @Controller and @ResponseBody, automatically serializing return values into JSON." },
+            { id: 3, q: "How do Java 21 Virtual Threads differ from traditional platform threads?", options: ["Virtual threads run only in C++", "Virtual threads are lightweight user-mode threads managed by the JVM, scaling to millions without OS thread overhead", "Virtual threads cannot perform I/O", "Virtual threads replace Java garbage collection"], ans: 1, exp: "Project Loom virtual threads multiplex millions of JVM tasks over a small carrier thread pool, vastly improving high-throughput I/O." },
+            { id: 4, q: "What is the contract between equals() and hashCode() in Java?", options: ["If two objects have the same hashCode, they must be equal", "If two objects are equal according to equals(), they MUST produce the identical hashCode()", "hashCode is only used for sorting", "They are completely unrelated"], ans: 1, exp: "If a.equals(b) is true, a.hashCode() must equal b.hashCode(). Otherwise, HashSet and HashMap lookups will fail." },
+            { id: 5, q: "What does the @Transactional annotation ensure in Spring Data JPA?", options: ["Encrypts all SQL queries with AES-256", "Executes database operations inside an ACID transaction, rolling back automatically on unchecked runtime exceptions", "Caches all queries forever", "Runs queries on separate physical servers"], ans: 1, exp: "@Transactional wraps database work in an atomic transaction; if an unhandled RuntimeException occurs, changes roll back." },
+            { id: 6, q: "What is the difference between Stream.map() and Stream.flatMap() in Java?", options: ["map transforms each element into a single value; flatMap transforms each element into a stream and flattens all streams into one", "flatMap only works on integers", "map is terminal; flatMap is intermediate", "There is no difference"], ans: 0, exp: "map performs 1-to-1 transformation, while flatMap transforms 1-to-many and flattens nested structures (e.g., Stream<List<T>> into Stream<T>)." }
+        ]
+    },
+    12: {
+        id: 12,
+        title: "Python: Production Systems & Automation Assessment",
+        questions: [
+            { id: 1, q: "What is the primary role of the yield keyword in a Python function?", options: ["Terminates the program immediately", "Turns the function into a generator that produces values lazily one at a time, conserving memory", "Imports a C module", "Deletes a variable from scope"], ans: 1, exp: "Using yield makes the function a generator iterator, yielding items on demand without allocating entire lists in memory." },
+            { id: 2, q: "What is the Python GIL (Global Interpreter Lock)?", options: ["A firewall protecting web applications", "A mutex that prevents multiple native threads from executing Python bytecodes simultaneously in CPython", "A security sandbox for untrusted scripts", "A tool for compiling Python into C"], ans: 1, exp: "CPython's GIL ensures thread-safety for reference counting by allowing only one native thread to run bytecode at a time." },
+            { id: 3, q: "How does a Python decorator @my_decorator work under the hood?", options: ["It modifies the bytecode before compilation", "It takes a function as an argument, wraps or extends its behavior, and returns the modified function", "It runs the function in a background worker thread", "It prevents recursion"], ans: 1, exp: "Decorators are syntactic sugar: @dec def f() is equivalent to f = dec(f)." },
+            { id: 4, q: "In Python, what is the key difference between the 'is' operator and '=='?", options: ["'is' checks equality of values; '==' checks identity in memory", "'is' checks reference/memory identity; '==' checks value equality", "They are 100% interchangeable", "'is' only works for integers"], ans: 1, exp: "'is' tests whether two references point to the exact same object in memory (id(a) == id(b)), while '==' checks value equality." },
+            { id: 5, q: "What is the correct syntax for a dictionary comprehension that squares each even number in range 1 to 6?", options: ["{x: x**2 for x in range(1, 7) if x % 2 == 0}", "[x**2 for x in range(1, 7)]", "{x**2: x for x in (1, 6)}", "dict(x, x**2)"], ans: 0, exp: "Dictionary comprehensions take the format {k: v for ... in ... if ...}." },
+            { id: 6, q: "What happens in Python if an exception is raised inside a try block that has a finally clause?", options: ["The finally block is skipped", "The finally block ALWAYS executes, whether an exception occurred or not", "The program crashes before finally runs", "All variables in memory are cleared"], ans: 1, exp: "The finally block is guaranteed to execute regardless of whether exceptions were raised or caught, making it ideal for cleanup." }
+        ]
+    },
+    13: {
+        id: 13,
+        title: "Data Structures & Algorithms (DSA) Assessment",
+        questions: [
+            { id: 1, q: "What is the worst-case and average-case time complexity of QuickSort?", options: ["Worst: O(n log n), Average: O(n)", "Worst: O(n^2), Average: O(n log n)", "Worst: O(n), Average: O(1)", "Worst: O(n^3), Average: O(n^2)"], ans: 1, exp: "When pivots are poorly chosen (e.g. sorted input with last element pivot), QuickSort degrades to O(n^2); on average it is O(n log n)." },
+            { id: 2, q: "Which data structure is optimal for implementing Dijkstra's Shortest Path algorithm efficiently?", options: ["Simple array: O(V^2)", "Min-Heap / Priority Queue: O((V + E) log V)", "Stack: O(V)", "Queue: O(E)"], ans: 1, exp: "A Min-Heap priority queue allows extracting the minimum distance vertex in O(log V) time, giving O((V + E) log V) total complexity." },
+            { id: 3, q: "What is the time complexity of searching, inserting, and deleting in a balanced Binary Search Tree (AVL / Red-Black)?", options: ["O(1)", "O(log n)", "O(n)", "O(n log n)"], ans: 1, exp: "Self-balancing binary search trees maintain tree height at O(log n), ensuring all basic operations run in logarithmic time." },
+            { id: 4, q: "How does Dynamic Programming differ from standard Divide and Conquer?", options: ["Divide and conquer uses recursion, DP does not", "DP solves overlapping subproblems by caching (memoization/tabulation) to avoid redundant recalculation", "DP only works on arrays", "There is no difference"], ans: 1, exp: "DP requires optimal substructure and overlapping subproblems, saving subproblem answers to avoid exponential re-computation." },
+            { id: 5, q: "What problem does Floyd's Cycle-Finding Algorithm (Tortoise and Hare) solve in O(n) time and O(1) space?", options: ["Sorting an array", "Detecting a cycle or loop in a singly linked list", "Finding the median of a stream", "Balancing a B-Tree"], ans: 1, exp: "Using two pointers moving at speeds 1 and 2 detects if a linked list contains a cycle without requiring extra hash set memory." },
+            { id: 6, q: "What is the maximum number of edges in an undirected simple graph with V vertices?", options: ["V", "V * (V - 1) / 2", "V^2", "2^V"], ans: 1, exp: "Each of the V vertices can connect to V-1 other vertices. Dividing by 2 for undirected edges gives V*(V-1)/2." }
         ]
     }
 };
@@ -452,6 +585,9 @@ function openModal(id) {
 function closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove("active");
+    if (id === 'modal-lesson') {
+        resetLessonCover();
+    }
 }
 
 // Switch Page Views
@@ -935,16 +1071,16 @@ function enrollInCurrentCourse() {
     executeEnrollment(activeCourseDetails.id);
 }
 
-// Verified Technical Video Mapping for all 13 Courses
+// Verified Technical Video Mapping for Courses
 const COURSE_VIDEO_MAP = {
-    1: { id: "jvbnKrIQpwo", title: "Verilog HDL and RTL Design Full Course" },
+    1: { id: "jvbnKrIQpwo", title: "Verilog HDL and RTL Design" },
     2: { id: "vdxLXnKyCTE", title: "SystemVerilog and Functional Verification" },
-    3: { id: "c13VcCbD1gQ", title: "UVM Verification Methodology Masterclass" },
-    4: { id: "LUazKW33uCc", title: "Physical Design & Static Timing Analysis (STA)" },
-    5: { id: "1EXxW6WxwVs", title: "Design for Testability (DFT) & Scan Chains" },
-    6: { id: "kKYWOiHBA48", title: "ASIC Design Flow: RTL to GDSII & SoC Flow" },
-    7: { id: "veQrRAO4d0w", title: "CMOS Inverter & Digital Electronics Fundamentals" },
-    8: { id: "qn_NZC9_8aY", title: "FPGA Design with Xilinx Vivado & Verilog" },
+    3: { id: "c13VcCbD1gQ", title: "UVM Verification Methodology" },
+    4: { id: "LUazKW33uCc", title: "Physical Design & Static Timing Analysis" },
+    5: { id: "1EXxW6WxwVs", title: "Design for Testability (DFT)" },
+    6: { id: "kKYWOiHBA48", title: "ASIC Design Flow & SoC Architecture" },
+    7: { id: "veQrRAO4d0w", title: "CMOS Inverter & Digital Electronics" },
+    8: { id: "qn_NZC9_8aY", title: "FPGA Design with Xilinx Vivado" },
     9: { id: "fP5sE7yxw-M", title: "Tcl and Python Scripting for VLSI Automation" },
     10: { id: "KJgsSFOSQv0", title: "C Programming: Fundamentals to Embedded Systems" },
     11: { id: "eIrMbAQSU34", title: "Java Programming: Full Stack Enterprise Edition" },
@@ -952,56 +1088,167 @@ const COURSE_VIDEO_MAP = {
     13: { id: "8hly31xKli0", title: "Data Structures and Algorithms (DSA) in Depth" }
 };
 
-// Helper: Dynamic Lesson Generator for all 13 courses with matching videos & syllabus
+// Curated Distinct Multi-Video Playlists for Every Module of Each Course
+const COURSE_VIDEO_PLAYLISTS = {
+    1: [ // Verilog HDL
+        { id: "jvbnKrIQpwo", title: "Verilog Fundamentals & Lexical Tokens" },
+        { id: "bCwhfB7Z7bA", title: "Gate & Dataflow Modeling" },
+        { id: "F7kC_l2fPyo", title: "Behavioral Modeling & Always Blocks" },
+        { id: "4qDq66b8t9k", title: "Finite State Machines (Moore & Mealy)" },
+        { id: "0v7K4n0uP_o", title: "Synchronous & Asynchronous FIFO Design" },
+        { id: "uW2rP-5iUqo", title: "Synthesis Guidelines & Race Conditions" }
+    ],
+    2: [ // SystemVerilog
+        { id: "vdxLXnKyCTE", title: "OOP Constructs & Polymorphism in SV" },
+        { id: "V_oQjW9C5v8", title: "Inter-Process Communication (Mailboxes & Semaphores)" },
+        { id: "g9d9uQ-gZqI", title: "Constrained Random Generation" },
+        { id: "RXZ_43w9w2o", title: "Functional Coverage & Cross Coverage" },
+        { id: "PZ2E3yFfU5w", title: "SystemVerilog Assertions (SVA)" },
+        { id: "eUo9T8L171s", title: "Layered Testbench Architecture" }
+    ],
+    3: [ // UVM
+        { id: "c13VcCbD1gQ", title: "UVM Architecture & Component Hierarchy" },
+        { id: "4w5Fk14_3kU", title: "Phasing Mechanism & Factory Pattern" },
+        { id: "k820J-2_9oA", title: "TLM 1.0 & 2.0 Interconnects" },
+        { id: "pX5g-3_92vL", title: "Sequence, Sequencer & Driver Interaction" },
+        { id: "9s8W8-gYt1c", title: "Scoreboard & Coverage Collectors" },
+        { id: "fK8qM2v-T8A", title: "UVM Register Abstraction Layer (RAL)" }
+    ],
+    4: [ // Physical Design & STA
+        { id: "LUazKW33uCc", title: "ASIC PD Flow Overview & Technology Files" },
+        { id: "v_7r0aB1-90", title: "Floorplanning & Power Mesh Synthesis" },
+        { id: "92K3bS-92vU", title: "Placement & High Fanout Net Synthesis (HFNS)" },
+        { id: "xK92b-8aN2A", title: "Clock Tree Synthesis (CTS) & Clock Skew Budgeting" },
+        { id: "L82f-38aL3k", title: "Global & Detailed Routing, DRC/LVS" },
+        { id: "2k82Fa-901p", title: "STA Constraints (SDC), Setup/Hold Analysis, OCV" }
+    ],
+    5: [ // DFT
+        { id: "1EXxW6WxwVs", title: "Fault Models (Stuck-At, Transition Delay)" },
+        { id: "d92K3b-810A", title: "Full Scan vs Partial Scan Architecture" },
+        { id: "91LqK2b-31A", title: "ATPG Pattern Generation & Fault Coverage Metrics" },
+        { id: "4k82Fa-9821", title: "Memory BIST (MBIST) Algorithms (March Tests)" },
+        { id: "820Jk1-91aA", title: "Logic BIST (LBIST) Principles" },
+        { id: "x810Ka-192B", title: "IEEE 1149.1 JTAG Controller and TAP Architecture" }
+    ],
+    6: [ // ASIC Design Flow & SoC
+        { id: "kKYWOiHBA48", title: "SoC Specifications & Microarchitecture Design" },
+        { id: "9k28a1-71bA", title: "Logic Synthesis using Synopsys Design Compiler" },
+        { id: "10K29b-81bA", title: "Formal Equivalence Checking (LEC/Formality)" },
+        { id: "721aB0-91cA", title: "Low Power Design using UPF/CPF" },
+        { id: "901bC2-81dA", title: "Signoff Verification (STA, DRC, LVS, ERC)" },
+        { id: "812cD3-91eA", title: "Packaging, Foundry Tape-Out and Silicon Bring-up" }
+    ],
+    7: [ // Digital Electronics & CMOS
+        { id: "veQrRAO4d0w", title: "Number Systems & Boolean Algebra Theorems" },
+        { id: "719aB2-901A", title: "CMOS Inverter VTC Curve & Noise Margins" },
+        { id: "810bC3-902A", title: "CMOS Static & Dynamic Power Dissipation" },
+        { id: "911cD4-903A", title: "Transmission Gates & Pass-Transistor Logic" },
+        { id: "102dE5-904A", title: "Latches, Flip-Flops & Metastability" },
+        { id: "203eF6-905A", title: "Euler Path & Stick Diagrams Layout" }
+    ],
+    8: [ // FPGA Vivado
+        { id: "qn_NZC9_8aY", title: "FPGA Architecture vs ASIC (CLBs, BRAM, DSP48)" },
+        { id: "820aB1-910A", title: "Vivado Design Suite Workflow" },
+        { id: "921bC2-911A", title: "Xilinx Constraint Files (XDC) & Timing Closure" },
+        { id: "102cD3-912A", title: "AXI4 Bus Protocol Interface" },
+        { id: "203dE4-913A", title: "Integrated Logic Analyzer (ILA) Hardware Debugging" },
+        { id: "304eF5-914A", title: "Real-time Audio/Video Processing on FPGA" }
+    ],
+    9: [ // Tcl/Python VLSI
+        { id: "fP5sE7yxw-M", title: "Tcl Syntax, Lists, Dictionaries & Procedures" },
+        { id: "921aB1-912A", title: "Tool Command Language in Synopsys/Cadence Environments" },
+        { id: "102bC2-913A", title: "Python for Log & Report Parsing (Regex)" },
+        { id: "203cD3-914A", title: "Automated Regression Testing Pipelines" },
+        { id: "304dE4-915A", title: "Batch Processing & Distributed Grid Submissions" },
+        { id: "405eF5-916A", title: "Building Custom EDA Productivity Utilities" }
+    ],
+    10: [ // C Programming
+        { id: "KJgsSFOSQv0", title: "Data Types, Control Structures & Operators" },
+        { id: "zuegQmMdy8M", title: "Pointers, Memory Addressing & Pointer Arithmetic" },
+        { id: "jlQmeyce65Q", title: "Bitwise Operators & Hardware Masking" },
+        { id: "2w3bK-9F9a8", title: "Dynamic Memory Allocation (malloc, free, realloc)" },
+        { id: "yXW1k8V2-8Q", title: "Structs, Unions & Bit-Fields" },
+        { id: "8PopR3x-3Lk", title: "File I/O, Makefiles & GCC Compilation Stages" }
+    ],
+    11: [ // Java
+        { id: "eIrMbAQSU34", title: "OOP Mastery: Inheritance, Polymorphism, Abstraction" },
+        { id: "vgxY3wK2nLQ", title: "Java Collections Framework (List, Set, Map, Queues)" },
+        { id: "Q932b-L2F9s", title: "Functional Programming with Lambdas & Stream API" },
+        { id: "0hQv8j-3X2c", title: "Multithreading, Synchronization & Virtual Threads" },
+        { id: "1a92kF-3s9P", title: "Exception Handling & File I/O" },
+        { id: "9SGDpanrc8U", title: "Spring Boot REST APIs, Spring Data JPA & MySQL" }
+    ],
+    12: [ // Python
+        { id: "rfscVS0vtbw", title: "Pythonic Syntax, Lists, Dicts & Comprehensions" },
+        { id: "W8KRzm-HUcc", title: "Functions, Decorators, Iterators & Generators" },
+        { id: "JeznW_749pm", title: "Object-Oriented Programming in Python" },
+        { id: "NIWwJbo-9_8", title: "Exception Handling & Packaging" },
+        { id: "tb8gHvYlCFs", title: "Working with APIs, JSON & Databases" },
+        { id: "vmEHCJofslg", title: "Data Processing with Pandas & Matplotlib" }
+    ],
+    13: [ // DSA
+        { id: "8hly31xKli0", title: "Asymptotic Complexity (Big-O, Omega, Theta Analysis)" },
+        { id: "RBSGKlAnoiM", title: "Linked Lists, Stacks, Queues & Hash Maps" },
+        { id: "oSWTXtMglKE", title: "Binary Search Trees, AVL Trees & Heaps" },
+        { id: "tWVWeAqZ0WU", title: "Graph Algorithms (BFS, DFS, Dijkstra, Kruskal)" },
+        { id: "j9fvd-3bK19", title: "Divide & Conquer, Backtracking & Recursion" },
+        { id: "oBt53YbR9Kk", title: "Dynamic Programming Patterns (1D & 2D Memoization)" }
+    ]
+};
+
+// Helper: Dynamic Lesson Generator for all 13 courses with distinct matching videos & syllabus
 function getLessonsForCourse(courseId) {
     if (COURSE_LESSONS[courseId]) return COURSE_LESSONS[courseId];
     const course = ALL_COURSES.find(c => c.id === courseId);
     if (!course) return COURSE_LESSONS[11] || [];
 
-    const vidInfo = COURSE_VIDEO_MAP[courseId] || { id: "jvbnKrIQpwo", title: course.title };
+    const playlist = COURSE_VIDEO_PLAYLISTS[courseId] || [];
+    const defaultVid = COURSE_VIDEO_MAP[courseId] || { id: "jvbnKrIQpwo", title: course.title };
     const lines = (course.syllabus || "").split('\n').filter(l => l.trim().length > 0);
 
     const generated = lines.map((line, idx) => {
         const moduleNum = idx + 1;
+        const vidInfo = playlist[idx] || defaultVid;
         let sampleSnippet = "";
 
         // Provide syllabus-specific code snippet based on course category
         if (courseId === 1) { // Verilog
-            sampleSnippet = `\`\`\`verilog\n// Module ${moduleNum} Implementation\nmodule rtl_design_mod${moduleNum} (\n    input wire clk, rst_n,\n    input wire [7:0] data_in,\n    output reg [7:0] data_out\n);\nalways @(posedge clk or negedge rst_n) begin\n    if (!rst_n) data_out <= 8'h00;\n    else data_out <= data_in;\nend\nendmodule\n\`\`\``;
+            sampleSnippet = `\`\`\`verilog\n// Module ${moduleNum} Implementation: ${line}\nmodule rtl_design_mod${moduleNum} (\n    input wire clk, rst_n,\n    input wire [7:0] data_in,\n    output reg [7:0] data_out\n);\nalways @(posedge clk or negedge rst_n) begin\n    if (!rst_n) data_out <= 8'h00;\n    else data_out <= data_in;\nend\nendmodule\n\`\`\``;
         } else if (courseId === 2) { // SystemVerilog
-            sampleSnippet = `\`\`\`systemverilog\n// SystemVerilog OOP Class\nclass transaction_mod${moduleNum};\n    rand bit [31:0] addr;\n    rand bit [31:0] data;\n    constraint c_addr { addr inside {[0:1023]}; }\n    function void print();\n        $display("[SV Testbench] addr=0x%0h data=0x%0h", addr, data);\n    endfunction\nendclass\n\`\`\``;
+            sampleSnippet = `\`\`\`systemverilog\n// SystemVerilog OOP Class: ${line}\nclass transaction_mod${moduleNum};\n    rand bit [31:0] addr;\n    rand bit [31:0] data;\n    constraint c_addr { addr inside {[0:1023]}; }\n    function void print();\n        $display("[SV Testbench] addr=0x%0h data=0x%0h", addr, data);\n    endfunction\nendclass\n\`\`\``;
         } else if (courseId === 3) { // UVM
-            sampleSnippet = `\`\`\`systemverilog\n// UVM Component Hierarchy\nclass my_driver_mod${moduleNum} extends uvm_driver #(my_transaction);\n    \`uvm_component_utils(my_driver_mod${moduleNum})\n    function new(string name, uvm_component parent);\n        super.new(name, parent);\n    endfunction\n    task run_phase(uvm_phase phase);\n        forever begin\n            seq_item_port.get_next_item(req);\n            // Drive signals to DUT\n            seq_item_port.item_done();\n        end\n    endtask\nendclass\n\`\`\``;
+            sampleSnippet = `\`\`\`systemverilog\n// UVM Component Hierarchy: ${line}\nclass my_driver_mod${moduleNum} extends uvm_driver #(my_transaction);\n    \`uvm_component_utils(my_driver_mod${moduleNum})\n    function new(string name, uvm_component parent);\n        super.new(name, parent);\n    endfunction\n    task run_phase(uvm_phase phase);\n        forever begin\n            seq_item_port.get_next_item(req);\n            // Drive signals to DUT\n            seq_item_port.item_done();\n        end\n    endtask\nendclass\n\`\`\``;
         } else if (courseId === 4) { // STA / PD
-            sampleSnippet = `\`\`\`tcl\n# PrimeTime STA Constraint Script\ncreate_clock -name CORE_CLK -period 1.25 [get_ports clk_in]\nset_input_delay -clock CORE_CLK 0.25 [get_ports data_in]\nset_output_delay -clock CORE_CLK 0.30 [get_ports data_out]\nreport_timing -delay_type max -nworst 5 -path_type full_clock\n# Setup condition: T_cq + T_comb + T_setup <= T_period + T_skew\n\`\`\``;
+            sampleSnippet = `\`\`\`tcl\n# PrimeTime STA Constraint Script: ${line}\ncreate_clock -name CORE_CLK -period 1.25 [get_ports clk_in]\nset_input_delay -clock CORE_CLK 0.25 [get_ports data_in]\nset_output_delay -clock CORE_CLK 0.30 [get_ports data_out]\nreport_timing -delay_type max -nworst 5 -path_type full_clock\n# Setup condition: T_cq + T_comb + T_setup <= T_period + T_skew\n\`\`\``;
         } else if (courseId === 5) { // DFT
-            sampleSnippet = `\`\`\`verilog\n// Scan Flip-Flop Implementation\nmodule scan_dff (input d, si, se, clk, output reg q);\n    wire d_in = se ? si : d;\n    always @(posedge clk) q <= d_in;\nendmodule\n\`\`\``;
+            sampleSnippet = `\`\`\`verilog\n// Scan Flip-Flop Implementation: ${line}\nmodule scan_dff (input d, si, se, clk, output reg q);\n    wire d_in = se ? si : d;\n    always @(posedge clk) q <= d_in;\nendmodule\n\`\`\``;
         } else if (courseId === 6) { // ASIC Flow
             sampleSnippet = `\`\`\`text\nASIC Sign-Off Checklist for ${line}:\n1. Logic Synthesis & Technology Mapping (Synopsys DC)\n2. Equivalence Checking (LEC/Formality clean)\n3. Floorplanning, CTS & Detail Routing (Innovus)\n4. Static Timing Analysis (PrimeTime WNS >= 0ps)\n5. DRC/LVS Verification (Mentor Calibre clean)\n\`\`\``;
         } else if (courseId === 7) { // CMOS
-            sampleSnippet = `\`\`\`text\nCMOS Inverter Key Formulas:\n- Switching Threshold: V_M = (V_DD - |V_tp| + V_tn * sqrt(beta_n/beta_p)) / (1 + sqrt(beta_n/beta_p))\n- Noise Margin Low: NM_L = V_IL - V_OL\n- Noise Margin High: NM_H = V_OH - V_IH\n- Dynamic Power: P_dyn = alpha * C_L * V_DD^2 * f_clk\n\`\`\``;
+            sampleSnippet = `\`\`\`text\nCMOS Inverter Key Formulas: ${line}\n- Switching Threshold: V_M = (V_DD - |V_tp| + V_tn * sqrt(beta_n/beta_p)) / (1 + sqrt(beta_n/beta_p))\n- Noise Margin Low: NM_L = V_IL - V_OL\n- Noise Margin High: NM_H = V_OH - V_IH\n- Dynamic Power: P_dyn = alpha * C_L * V_DD^2 * f_clk\n\`\`\``;
         } else if (courseId === 8) { // FPGA
-            sampleSnippet = `\`\`\`tcl\n# Vivado XDC Timing & Pin Constraints\nset_property PACKAGE_PIN Y9 [get_ports clk_100mhz]\nset_property IOSTANDARD LVCMOS33 [get_ports clk_100mhz]\ncreate_clock -period 10.000 -name sys_clk [get_ports clk_100mhz]\n\`\`\``;
+            sampleSnippet = `\`\`\`tcl\n# Vivado XDC Timing & Pin Constraints: ${line}\nset_property PACKAGE_PIN Y9 [get_ports clk_100mhz]\nset_property IOSTANDARD LVCMOS33 [get_ports clk_100mhz]\ncreate_clock -period 10.000 -name sys_clk [get_ports clk_100mhz]\n\`\`\``;
         } else if (courseId === 9) { // Tcl/Python
-            sampleSnippet = `\`\`\`tcl\n# EDA Automation Utility\nproc check_timing_slack {max_violations} {\n    set bad_paths [get_timing_paths -delay_type max -slack_lesser_than 0.0]\n    puts "Total Violating Paths: [sizeof_collection $bad_paths]"\n    return [sizeof_collection $bad_paths]\n}\n\`\`\``;
+            sampleSnippet = `\`\`\`tcl\n# EDA Automation Utility: ${line}\nproc check_timing_slack {max_violations} {\n    set bad_paths [get_timing_paths -delay_type max -slack_lesser_than 0.0]\n    puts "Total Violating Paths: [sizeof_collection $bad_paths]"\n    return [sizeof_collection $bad_paths]\n}\n\`\`\``;
         } else if (courseId === 10) { // C Programming
-            sampleSnippet = `\`\`\`c\n#include <stdio.h>\n#include <stdlib.h>\n\n// Module ${moduleNum} Systems Lab\nint main(void) {\n    unsigned int reg = 0x00000000;\n    reg |= (1U << 4); // Set bit 4 (Enable hardware peripheral)\n    printf("Control Register: 0x%08X\\n", reg);\n    return 0;\n}\n\`\`\``;
+            sampleSnippet = `\`\`\`c\n#include <stdio.h>\n#include <stdlib.h>\n\n// Module ${moduleNum} Systems Lab: ${line}\nint main(void) {\n    unsigned int reg = 0x00000000;\n    reg |= (1U << 4); // Set bit 4 (Enable hardware peripheral)\n    printf("Control Register: 0x%08X\\n", reg);\n    return 0;\n}\n\`\`\``;
         } else if (courseId === 11) { // Java
-            sampleSnippet = `\`\`\`java\n// Spring Boot Enterprise Controller\n@RestController\n@RequestMapping("/api/module${moduleNum}")\npublic class Module${moduleNum}Controller {\n    @GetMapping("/status")\n    public ResponseEntity<String> getStatus() {\n        return ResponseEntity.ok("Module ${moduleNum} Online");\n    }\n}\n\`\`\``;
+            sampleSnippet = `\`\`\`java\n// Spring Boot Enterprise Controller: ${line}\n@RestController\n@RequestMapping("/api/module${moduleNum}")\npublic class Module${moduleNum}Controller {\n    @GetMapping("/status")\n    public ResponseEntity<String> getStatus() {\n        return ResponseEntity.ok("Module ${moduleNum} Online: ${line}");\n    }\n}\n\`\`\``;
         } else if (courseId === 12) { // Python
-            sampleSnippet = `\`\`\`python\n# Pythonic Module ${moduleNum}\ndef process_data(records: list[dict]) -> dict:\n    return {r['id']: r['val'] for r in records if r.get('active', False)}\n\nprint("Pipeline executed successfully.")\n\`\`\``;
+            sampleSnippet = `\`\`\`python\n# Pythonic Module ${moduleNum}: ${line}\ndef process_data(records: list[dict]) -> dict:\n    return {r['id']: r['val'] for r in records if r.get('active', False)}\n\nprint("Pipeline executed successfully for ${line}.")\n\`\`\``;
         } else if (courseId === 13) { // DSA
-            sampleSnippet = `\`\`\`java\n// Algorithmic Implementation\npublic class SolutionMod${moduleNum} {\n    public boolean search(int[] arr, int target) {\n        int left = 0, right = arr.length - 1;\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n            if (arr[mid] == target) return true;\n            if (arr[mid] < target) left = mid + 1;\n            else right = mid - 1;\n        }\n        return false;\n    }\n}\n\`\`\``;
+            sampleSnippet = `\`\`\`java\n// Algorithmic Implementation: ${line}\npublic class SolutionMod${moduleNum} {\n    public boolean search(int[] arr, int target) {\n        int left = 0, right = arr.length - 1;\n        while (left <= right) {\n            int mid = left + (right - left) / 2;\n            if (arr[mid] == target) return true;\n            if (arr[mid] < target) left = mid + 1;\n            else right = mid - 1;\n        }\n        return false;\n    }\n}\n\`\`\``;
         }
 
         return {
             id: courseId * 100 + moduleNum,
             title: line,
-            duration: `${25 + (moduleNum * 5)} Mins`,
+            duration: `${30 + (moduleNum * 5)} Mins`,
             isCompleted: false,
             videoId: vidInfo.id,
             video: `https://www.youtube.com/embed/${vidInfo.id}`,
-            notes: `### ${line}\n\n**Course**: ${course.title}  \n**Faculty**: ${course.instructorName} (${course.instructorTitle})  \n**Lecture Focus**: ${line}\n\n#### Key Objectives\n1. Deep theoretical foundations and industry-standard best practices.\n2. Architecture diagrams, signal timing behaviors, and execution flows.\n3. Hands-on coding and lab implementation.\n\n${sampleSnippet}\n\n#### Practical Exercises\n- Review the video lecture above in full.\n- Experiment with the provided code snippet.\n- Complete the assessment quiz to solidify your understanding.`
+            videoTitle: vidInfo.title || line,
+            notes: `### ${line}\n\n**Course**: ${course.title}  \n**Faculty**: ${course.instructorName} (${course.instructorTitle})  \n**Lecture Focus**: ${line}  \n**Curated Technical Video**: ${vidInfo.title || line}  \n**Specified Stream ID**: \`${vidInfo.id}\`\n\n#### Key Objectives\n1. Deep theoretical foundations and industry-standard best practices.\n2. Architecture diagrams, signal timing behaviors, and execution flows.\n3. Hands-on coding and lab implementation.\n\n${sampleSnippet}\n\n#### Practical Exercises\n- Review the video lecture stream above.\n- Run the provided code snippet on your target EDA / compiler environment.\n- Complete the technical quiz assessment to solidify your understanding.`
         };
     });
 
@@ -1009,7 +1256,7 @@ function getLessonsForCourse(courseId) {
     return generated;
 }
 
-// Helper: Dynamic Quiz Generator for all 13 courses
+// Helper: Dynamic Quiz Generator with fallback
 function getQuizForCourse(courseId) {
     if (QUIZZES[courseId]) return QUIZZES[courseId];
     const course = ALL_COURSES.find(c => c.id === courseId);
@@ -1020,7 +1267,9 @@ function getQuizForCourse(courseId) {
         questions: [
             { id: 1, q: `What is the primary technical objective covered in ${title}?`, options: ["Functional verification & architecture compliance", "Manual netlist compilation without constraints", "Bypassing STA timing closure", "None of the above"], ans: 0, exp: "Functional correctness and adherence to silicon architecture standards is the primary goal." },
             { id: 2, q: `Which industry-standard flow is practiced in this module?`, options: ["Ad-hoc scripts without version control", "Automated EDA simulation, synthesis, and regression pipelines", "Ignoring design rule checks (DRC)", "Manual breadboard wiring"], ans: 1, exp: "Production engineering uses automated EDA regressions and verification suites." },
-            { id: 3, q: `What metric is mandatory for final sign-off in this discipline?`, options: ["100% testbench and functional coverage", "Zero timing violations (WNS >= 0ps)", "Clean DRC/LVS physical checks", "All of the above"], ans: 3, exp: "Silicon tape-out sign-off requires meeting timing closure, coverage targets, and clean DRC/LVS." }
+            { id: 3, q: `What metric is mandatory for final sign-off in this discipline?`, options: ["100% testbench and functional coverage", "Zero timing violations (WNS >= 0ps)", "Clean DRC/LVS physical checks", "All of the above"], ans: 3, exp: "Silicon tape-out sign-off requires meeting timing closure, coverage targets, and clean DRC/LVS." },
+            { id: 4, q: `How are design regressions executed in an automated environment?`, options: ["Continuous Integration (CI) test pipelines with automated log parsing", "Manual command entry in terminal", "Visual inspection of oscilloscope", "Bypassing regression tests"], ans: 0, exp: "Modern engineering leverages CI/CD automation pipelines for continuous verification regression suites." },
+            { id: 5, q: `What constitutes production-ready code in this domain?`, options: ["Meets coding guidelines, has passing automated tests, and adheres to design standards", "Compiles without error only once", "Works only on developer local workstation", "Has no documentation"], ans: 0, exp: "High reliability systems require lint-clean, fully tested, and strictly architected code." }
         ]
     };
 }
@@ -1245,9 +1494,27 @@ function renderStudentDashboard() {
     `).join("");
 }
 
-// Lesson Player
+// Lesson Player State & Controls
 let currentPlayingCourseId = 11;
 let currentLessonId = 114;
+let activeLessonVideoId = "jvbnKrIQpwo";
+let activeLessonVideoUrl = "";
+
+function startLessonVideo() {
+    const cover = document.getElementById("player-cover");
+    if (cover) cover.classList.add("hidden");
+    const iframe = document.getElementById("player-video");
+    if (iframe && activeLessonVideoId) {
+        iframe.src = `https://www.youtube.com/embed/${activeLessonVideoId}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0`;
+    }
+}
+
+function resetLessonCover() {
+    const cover = document.getElementById("player-cover");
+    if (cover) cover.classList.remove("hidden");
+    const iframe = document.getElementById("player-video");
+    if (iframe) iframe.src = "";
+}
 
 function openLessonPlayer(courseId) {
     currentPlayingCourseId = courseId;
@@ -1263,6 +1530,9 @@ function openLessonPlayer(courseId) {
 
 function renderLessonPlayerContent(lesson, lessons) {
     currentLessonId = lesson.id;
+    activeLessonVideoId = lesson.videoId || "jvbnKrIQpwo";
+    activeLessonVideoUrl = lesson.video || `https://www.youtube.com/embed/${activeLessonVideoId}`;
+
     document.getElementById("player-lesson-title").innerText = lesson.title;
     document.getElementById("player-notes").innerText = lesson.notes;
     document.getElementById("player-complete-btn").innerText = lesson.isCompleted ? "✓ Completed" : "Mark as Completed";
@@ -1270,15 +1540,20 @@ function renderLessonPlayerContent(lesson, lessons) {
         "px-5 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs uppercase tracking-wider font-bold" :
         "px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs uppercase tracking-wider font-bold shadow-lg shadow-emerald-600/30";
 
-    // Dynamic Video Update
-    const iframe = document.getElementById("player-video");
-    if (iframe && lesson.video) {
-        iframe.src = lesson.video;
-    }
+    // Update Player Cover elements to cleanly specify stream while concealing YouTube's thumbnail
+    const coverTitle = document.getElementById("player-cover-title");
+    if (coverTitle) coverTitle.innerText = lesson.title;
+    const coverVidId = document.getElementById("player-cover-vidid");
+    if (coverVidId) coverVidId.innerText = activeLessonVideoId;
+    const coverDur = document.getElementById("player-cover-duration");
+    if (coverDur) coverDur.innerText = `⏱ Duration: ${lesson.duration || '35 Mins'}`;
+
+    // Reset cover to visible and clear iframe so no YouTube thumbnail is shown
+    resetLessonCover();
+
     const ytLink = document.getElementById("player-yt-link");
     if (ytLink) {
-        const vidId = lesson.videoId || (lesson.video ? lesson.video.split('/').pop().split('?')[0] : '');
-        ytLink.href = vidId ? `https://www.youtube.com/watch?v=${vidId}` : (lesson.video || '#');
+        ytLink.href = activeLessonVideoId ? `https://www.youtube.com/watch?v=${activeLessonVideoId}` : (lesson.video || '#');
     }
     const durBadge = document.getElementById("player-duration-badge");
     if (durBadge) {
