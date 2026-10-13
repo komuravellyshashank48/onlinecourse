@@ -4,7 +4,7 @@
 const API_BASE = '/api';
 
 // Pre-seeded Course Data
-const ALL_COURSES = [
+let ALL_COURSES = [
     {
         id: 1,
         title: "Verilog HDL and RTL Design",
@@ -295,9 +295,138 @@ function saveUserEnrollments(email, enrollments) {
     localStorage.setItem('enrollments_' + email.toLowerCase(), JSON.stringify(enrollments));
 }
 
+// Load custom and backend courses dynamically
+async function loadCourses() {
+    const customCourses = localStorage.getItem('custom_courses');
+    if (customCourses) {
+        try {
+            const parsed = JSON.parse(customCourses);
+            parsed.forEach(pc => {
+                if (!ALL_COURSES.some(c => c.id === pc.id)) {
+                    ALL_COURSES.unshift(pc);
+                }
+            });
+        } catch (e) {}
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/courses`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                data.data.forEach(bc => {
+                    const idx = ALL_COURSES.findIndex(c => c.id === bc.id);
+                    if (idx >= 0) {
+                        ALL_COURSES[idx].title = bc.title;
+                        ALL_COURSES[idx].description = bc.description;
+                        ALL_COURSES[idx].category = bc.category;
+                        ALL_COURSES[idx].level = bc.level;
+                        ALL_COURSES[idx].duration = bc.duration;
+                        ALL_COURSES[idx].price = bc.price;
+                        ALL_COURSES[idx].syllabus = bc.syllabus;
+                        if (bc.instructorName) ALL_COURSES[idx].instructorName = bc.instructorName;
+                    } else {
+                        ALL_COURSES.push({
+                            id: bc.id,
+                            title: bc.title,
+                            category: bc.category,
+                            level: bc.level,
+                            duration: bc.duration,
+                            price: bc.price,
+                            rating: bc.averageRating || 4.9,
+                            instructorName: bc.instructorName || "Faculty Member",
+                            instructorTitle: bc.instructorTitle || "Senior Specialist",
+                            thumbnailUrl: bc.thumbnailUrl || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600",
+                            description: bc.description,
+                            syllabus: bc.syllabus,
+                            prerequisites: bc.prerequisites || "General fundamentals"
+                        });
+                    }
+                });
+                renderCourseGrid();
+            }
+        }
+    } catch(e) {
+        console.warn("Backend courses sync:", e);
+    }
+}
+
+// Insert / Create New Course
+async function handleCreateCourse(e) {
+    e.preventDefault();
+    const title = document.getElementById("new-course-title").value.trim();
+    const category = document.getElementById("new-course-category").value;
+    const level = document.getElementById("new-course-level").value;
+    const duration = document.getElementById("new-course-duration").value.trim();
+    const price = parseFloat(document.getElementById("new-course-price").value) || 4999;
+    const desc = document.getElementById("new-course-desc").value.trim();
+    const syllabus = document.getElementById("new-course-syllabus").value.trim();
+
+    if (!title) return;
+
+    const newId = Date.now();
+    const newCourse = {
+        id: newId,
+        title: title,
+        category: category,
+        level: level,
+        duration: duration,
+        price: price,
+        rating: 5.0,
+        instructorName: currentUser ? currentUser.name : "Dr. Vikram Raman",
+        instructorTitle: currentUser && currentUser.title ? currentUser.title : "Technical Specialist",
+        thumbnailUrl: category.includes("VLSI") 
+            ? "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600"
+            : "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600",
+        description: desc,
+        syllabus: syllabus,
+        prerequisites: "Fundamental concepts in " + category
+    };
+
+    if (currentToken) {
+        try {
+            await fetch(`${API_BASE}/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                },
+                body: JSON.stringify({
+                    title: title,
+                    description: desc,
+                    category: category,
+                    level: level,
+                    duration: duration,
+                    price: price,
+                    syllabus: syllabus,
+                    status: "PUBLISHED"
+                })
+            });
+        } catch(err) {
+            console.warn("Backend course insert:", err);
+        }
+    }
+
+    ALL_COURSES.unshift(newCourse);
+
+    const savedCustom = localStorage.getItem('custom_courses');
+    let customList = savedCustom ? JSON.parse(savedCustom) : [];
+    customList.unshift(newCourse);
+    localStorage.setItem('custom_courses', JSON.stringify(customList));
+
+    document.getElementById("add-course-form").reset();
+    closeModal("modal-add-course");
+
+    renderCourseGrid();
+    switchView('home');
+
+    showToast(`🎉 Course "${title}" successfully inserted into catalog!`);
+}
+
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
     updateNavUser();
+    loadCourses();
     renderCourseGrid();
     renderStudentDashboard();
     renderInstructorDashboard();
@@ -1032,15 +1161,47 @@ function renderStudentDashboard() {
 
     if (userCourses.length === 0) {
         list.innerHTML = `
-            <div class="p-10 rounded-2xl bg-slate-900/60 border border-slate-800 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto mb-4 text-3xl">🎓</div>
-                <h4 class="text-xl font-bold text-white mb-2">No Courses Enrolled Yet</h4>
-                <p class="text-slate-400 text-sm max-w-md mx-auto mb-6 leading-relaxed">
-                    Welcome, <strong>${currentUser ? currentUser.name : 'Learner'}</strong>! You haven't enrolled in any courses yet. Browse our 13 industry-vetted courses in VLSI and Software Engineering below and click <strong>Enroll Now</strong> to begin learning.
+            <div class="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 text-center mb-8">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center mx-auto mb-3 text-3xl">🎓</div>
+                <h4 class="text-xl font-bold text-white mb-2">Welcome, ${currentUser ? currentUser.name : 'Learner'}!</h4>
+                <p class="text-slate-400 text-sm max-w-md mx-auto mb-4 leading-relaxed">
+                    You have not enrolled in any courses yet. Choose any course below and click <strong>Enroll Now</strong> to begin learning and add your name to the course!
                 </p>
-                <button onclick="switchView('home'); document.getElementById('course-grid').scrollIntoView({behavior: 'smooth'})" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition">
-                    Explore 13 Technical Courses & Enroll
+                <button onclick="switchView('home'); document.getElementById('course-grid').scrollIntoView({behavior: 'smooth'})" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition">
+                    Browse All Catalog Courses
                 </button>
+            </div>
+
+            <div class="mt-6">
+                <h4 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    Available Courses — Click "Enroll Now" to Insert Enrollment:
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${ALL_COURSES.map(c => `
+                        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between text-[11px] mb-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-slate-800 text-blue-300 font-semibold uppercase">${c.level}</span>
+                                    <span class="text-slate-400">⏱ ${c.duration}</span>
+                                </div>
+                                <h5 class="text-base font-bold text-white line-clamp-1">${c.title}</h5>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">${c.description}</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+                                <span class="text-sm font-bold text-white">₹${c.price.toLocaleString()}</span>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="viewCourseDetails(${c.id})" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+                                        Syllabus
+                                    </button>
+                                    <button onclick="executeEnrollment(${c.id})" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 transition">
+                                        Enroll Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `;
         return;
