@@ -8,4 +8,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/course-management-system-1.0.0.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["sh", "-c", "exec java -Dserver.port=${PORT:-8080} -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java -Dserver.port=${PORT:-8080} -Dapp.seed-demo-data=${APP_SEED_DEMO_DATA:-false} -jar /app/app.jar"]
