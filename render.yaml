@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: semicontech-academy
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    autoDeployTrigger: commit
+    envVars:
+      - key: SPRING_H2_CONSOLE_ENABLED
+        value: "false"
+      - key: APP_JWT_SECRET
+        generateValue: true
