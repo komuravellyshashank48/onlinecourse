@@ -2,6 +2,7 @@ package com.semicontech.lms.config;
 
 import com.semicontech.lms.entity.*;
 import com.semicontech.lms.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,9 @@ public class DataInitializer implements CommandLineRunner {
     private final CertificateRepository certificateRepository;
     private final ReviewRepository reviewRepository;
     private final PasswordEncoder passwordEncoder;
+
+        @Value("${app.seed-demo-data:true}")
+        private boolean seedDemoData;
 
     public DataInitializer(UserRepository userRepository,
                            CourseRepository courseRepository,
@@ -49,7 +53,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (userRepository.count() > 0) return;
+                if (!seedDemoData || userRepository.count() > 0) return;
 
         // 1. Create Users
         User admin = new User("Dr. Elena Rostova", "admin@lms.com", passwordEncoder.encode("Admin@123"), "ROLE_ADMIN", "Chief Academic Officer & VLSI Architect", "20+ years of semiconductor design leadership and academic direction.");
