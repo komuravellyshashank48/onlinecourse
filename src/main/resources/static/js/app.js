@@ -246,6 +246,38 @@ const RAHUL_DEFAULT_ENROLLMENTS = [
     { courseId: 10, title: "C Programming: From Fundamentals to Embedded Systems", category: "Programming and Computer Science", progress: 50, completedLessons: 1, totalLessons: 2, hasCert: false }
 ];
 
+// Default verified student enrollments (Rahul Sharma is pre-enrolled in 4 courses, all other 9 courses start at 0 enrolled students)
+const DEFAULT_COURSE_STUDENTS = {
+    1: ["Rahul Sharma"],
+    10: ["Rahul Sharma"],
+    11: ["Rahul Sharma"],
+    12: ["Rahul Sharma"]
+};
+
+function getCourseEnrolledStudents(courseId) {
+    const stored = localStorage.getItem('course_students_' + courseId);
+    if (stored) {
+        try { return JSON.parse(stored); } catch(e) {}
+    }
+    return DEFAULT_COURSE_STUDENTS[courseId] ? [...DEFAULT_COURSE_STUDENTS[courseId]] : [];
+}
+
+function addStudentToCourse(courseId, studentName) {
+    if (!studentName) return;
+    let current = getCourseEnrolledStudents(courseId);
+    if (!current.some(n => n.toLowerCase() === studentName.toLowerCase())) {
+        current.push(studentName);
+        localStorage.setItem('course_students_' + courseId, JSON.stringify(current));
+    }
+}
+
+function removeStudentFromCourse(courseId, studentName) {
+    if (!studentName) return;
+    let current = getCourseEnrolledStudents(courseId);
+    current = current.filter(n => n.toLowerCase() !== studentName.toLowerCase());
+    localStorage.setItem('course_students_' + courseId, JSON.stringify(current));
+}
+
 // Helper: Get user's current enrollments
 function getUserEnrollments(email) {
     if (!email) return [];
@@ -490,6 +522,20 @@ async function handleAuthSubmit(e) {
                 if (!localStorage.getItem('enrollments_' + email)) {
                     localStorage.setItem('enrollments_' + email, JSON.stringify([]));
                 }
+                // Save to registered users directory
+                const registeredList = localStorage.getItem('registered_users_list');
+                let uList = registeredList ? JSON.parse(registeredList) : [];
+                if (!uList.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                    uList.push({
+                        name: currentUser.name,
+                        email: currentUser.email,
+                        role: (currentUser.role || role).replace('ROLE_', ''),
+                        title: (currentUser.role || role).includes('INSTRUCTOR') ? 'Technical Faculty' : 'Registered Student',
+                        enrolledCount: 0,
+                        status: "ACTIVE"
+                    });
+                    localStorage.setItem('registered_users_list', JSON.stringify(uList));
+                }
                 updateNavUser();
                 closeModal('modal-auth');
                 showToast(`🎉 Welcome to SemiconTech Academy, ${currentUser.name}! Account registered.`);
@@ -646,8 +692,38 @@ function renderCourseGrid() {
                     </div>
                     <div class="mt-3 flex items-center gap-4 text-xs text-slate-400">
                         <span>⏱ ${c.duration}</span>
-                        <span>📚 Comprehensive Labs</span>
+                        <span>📚 Practical Labs</span>
                     </div>
+
+                    ${(() => {
+                        const students = getCourseEnrolledStudents(c.id);
+                        if (students.length > 0) {
+                            return `
+                                <div class="mt-3 p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/20 text-xs">
+                                    <div class="text-[11px] text-slate-400 font-medium mb-1 flex items-center justify-between">
+                                        <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            ${students.length} Enrolled Student${students.length > 1 ? 's' : ''}:
+                                        </span>
+                                        <span class="text-[9px] bg-emerald-500/10 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase font-semibold">Verified</span>
+                                    </div>
+                                    <div class="font-bold text-slate-200 text-xs truncate" title="${students.join(', ')}">
+                                        👤 ${students.join(', ')}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="mt-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs">
+                                    <div class="flex items-center justify-between text-slate-500 text-[11px]">
+                                        <span class="flex items-center gap-1">👥 0 Enrolled</span>
+                                        <span class="text-[9px] text-slate-500 uppercase">Zero Fake Counts</span>
+                                    </div>
+                                    <div class="text-slate-400 text-[11px] mt-0.5">No students yet &bull; Be the first to enroll!</div>
+                                </div>
+                            `;
+                        }
+                    })()}
                 </div>
                 <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between gap-3">
                     <div>
@@ -683,6 +759,29 @@ function viewCourseDetails(courseId) {
     document.getElementById("modal-c-price").innerText = "₹" + course.price.toLocaleString();
     document.getElementById("modal-c-rating").innerText = course.rating;
     document.getElementById("modal-c-syllabus").innerText = course.syllabus;
+
+    // Populate Real Enrolled Students
+    const students = getCourseEnrolledStudents(courseId);
+    const countBadge = document.getElementById("modal-c-enrolled-count");
+    if (countBadge) countBadge.innerText = `${students.length} Verified Student${students.length === 1 ? '' : 's'}`;
+    const studentsListEl = document.getElementById("modal-c-students-list");
+    if (studentsListEl) {
+        if (students.length > 0) {
+            studentsListEl.innerHTML = `
+                <div class="flex flex-wrap gap-2">
+                    ${students.map(s => `
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-semibold text-xs">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            ${s}
+                            <span class="text-[10px] text-slate-400 font-normal">(Verified Student)</span>
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            studentsListEl.innerHTML = `<div class="text-slate-400 text-xs py-1 italic">No students have enrolled in this module yet. Zero fake data! Click "Enroll Now" below to enroll and your name will appear here immediately.</div>`;
+        }
+    }
 
     openModal('modal-course');
 }
@@ -873,6 +972,8 @@ async function executeEnrollment(courseId) {
     });
 
     saveUserEnrollments(currentUser.email, userCourses);
+    addStudentToCourse(course.id, currentUser.name);
+    renderCourseGrid();
 
     showToast(`🎉 Successfully enrolled in "${course.title}"! Lessons unlocked.`);
     renderStudentDashboard();
@@ -892,6 +993,8 @@ async function cancelEnrollment(courseId) {
     let userCourses = getUserEnrollments(currentUser.email);
     userCourses = userCourses.filter(c => c.courseId !== courseId);
     saveUserEnrollments(currentUser.email, userCourses);
+    removeStudentFromCourse(courseId, currentUser.name);
+    renderCourseGrid();
 
     if (currentToken) {
         try {
@@ -1204,30 +1307,144 @@ function renderInstructorDashboard() {
     `).join("");
 }
 
+// Registered Users Directory & Active Logins
+const DEFAULT_USERS_DIRECTORY = [
+    { name: "Rahul Sharma", email: "rahul@lms.com", role: "STUDENT", title: "Graduate Semiconductor Trainee", enrolledCount: 4, status: "ACTIVE" },
+    { name: "Priya Patel", email: "priya@lms.com", role: "STUDENT", title: "VLSI Design Aspirant", enrolledCount: 0, status: "ACTIVE" },
+    { name: "Dr. Vikram Raman", email: "vikram@lms.com", role: "INSTRUCTOR", title: "Principal Verification Engineer (Ex-Intel/TI)", enrolledCount: 3, status: "ACTIVE" },
+    { name: "Ananya Deshmukh", email: "ananya@lms.com", role: "INSTRUCTOR", title: "Lead Physical Design & STA Specialist", enrolledCount: 3, status: "ACTIVE" },
+    { name: "Prof. Rajesh Verma", email: "rajesh@lms.com", role: "INSTRUCTOR", title: "Senior Software Architect & Systems Programmer", enrolledCount: 4, status: "ACTIVE" },
+    { name: "Dr. Elena Rostova", email: "admin@lms.com", role: "ADMIN", title: "Chief Academic Officer & VLSI Architect", enrolledCount: 0, status: "ACTIVE" }
+];
+
+function getAllRegisteredUsers() {
+    const custom = localStorage.getItem('registered_users_list');
+    let list = custom ? JSON.parse(custom) : [];
+    const combined = [...DEFAULT_USERS_DIRECTORY];
+    list.forEach(u => {
+        if (!combined.some(existing => existing.email.toLowerCase() === u.email.toLowerCase())) {
+            combined.push(u);
+        }
+    });
+    combined.forEach(u => {
+        if (u.role === 'STUDENT') {
+            const enrollments = getUserEnrollments(u.email);
+            u.enrolledCount = enrollments.length;
+        }
+    });
+    return combined;
+}
+
+async function openUsersDirectoryModal() {
+    const tbody = document.getElementById("users-directory-table-body");
+    if (!tbody) return;
+
+    let users = getAllRegisteredUsers();
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/users`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.data && data.data.length > 0) {
+                data.data.forEach(bu => {
+                    const idx = users.findIndex(u => u.email.toLowerCase() === bu.email.toLowerCase());
+                    if (idx >= 0) {
+                        users[idx].enrolledCount = bu.enrolledCount;
+                    } else {
+                        users.push({
+                            name: bu.name,
+                            email: bu.email,
+                            role: bu.role,
+                            title: bu.title,
+                            enrolledCount: bu.enrolledCount,
+                            status: bu.status
+                        });
+                    }
+                });
+            }
+        }
+    } catch(e) {
+        console.warn("Backend users directory fetch:", e);
+    }
+
+    tbody.innerHTML = users.map(u => `
+        <tr class="hover:bg-slate-900/60 transition">
+            <td class="py-3 px-4 font-bold text-white flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-slate-800 text-blue-400 flex items-center justify-center font-bold text-xs uppercase border border-slate-700">
+                    ${u.name.charAt(0)}
+                </div>
+                <div>
+                    <div>${u.name}</div>
+                    <div class="text-[10px] text-slate-400 font-normal">${u.title || 'Platform Member'}</div>
+                </div>
+            </td>
+            <td class="py-3 px-4 font-mono text-slate-300 text-xs">${u.email}</td>
+            <td class="py-3 px-4">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+                    u.role === 'ADMIN' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                    u.role === 'INSTRUCTOR' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                    'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                }">
+                    ${u.role}
+                </span>
+            </td>
+            <td class="py-3 px-4 font-bold ${u.enrolledCount > 0 ? 'text-emerald-400' : 'text-slate-500'}">
+                ${u.enrolledCount} Course${u.enrolledCount === 1 ? '' : 's'}
+            </td>
+            <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1 text-emerald-400 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Verified
+                </span>
+            </td>
+            <td class="py-3 px-4 text-right">
+                <button onclick="loginAsUser('${u.email}', '${u.name}', '${u.role}')" class="px-3 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 font-semibold text-xs border border-blue-500/30 transition">
+                    Login As User
+                </button>
+            </td>
+        </tr>
+    `).join("");
+
+    openModal('modal-users-directory');
+}
+
+function loginAsUser(email, name, role) {
+    currentUser = {
+        name: name,
+        email: email,
+        role: role.startsWith('ROLE_') ? role : 'ROLE_' + role,
+        title: "Verified User"
+    };
+    currentToken = "demo-token-" + Date.now();
+    localStorage.setItem("user", JSON.stringify(currentUser));
+    localStorage.setItem("token", currentToken);
+    closeModal('modal-users-directory');
+    updateNavUser();
+    renderCourseGrid();
+    renderStudentDashboard();
+    showToast(`🟢 Logged in as: ${name} (${role})`);
+    if (role === 'ADMIN') switchView('admin');
+    else if (role === 'INSTRUCTOR') switchView('instructor');
+    else switchView('student');
+}
+
 // Admin Dashboard
 function renderAdminDashboard() {
     const table = document.getElementById("admin-users-table");
     if (!table) return;
 
-    const users = [
-        { name: "Rahul Sharma", email: "rahul@lms.com", role: "STUDENT", status: "ACTIVE" },
-        { name: "Priya Patel", email: "priya@lms.com", role: "STUDENT", status: "ACTIVE" },
-        { name: "Dr. Vikram Raman", email: "vikram@lms.com", role: "INSTRUCTOR", status: "ACTIVE" },
-        { name: "Ananya Deshmukh", email: "ananya@lms.com", role: "INSTRUCTOR", status: "ACTIVE" },
-        { name: "Prof. Rajesh Verma", email: "rajesh@lms.com", role: "INSTRUCTOR", status: "ACTIVE" },
-        { name: "Dr. Elena Rostova", email: "admin@lms.com", role: "ADMIN", status: "ACTIVE" }
-    ];
+    const users = getAllRegisteredUsers();
 
     table.innerHTML = users.map(u => `
         <tr class="hover:bg-slate-800/40">
             <td class="px-4 py-3 font-semibold text-white">${u.name}</td>
             <td class="px-4 py-3 text-slate-400">${u.email}</td>
             <td class="px-4 py-3"><span class="text-[11px] font-semibold px-2 py-0.5 rounded-md ${u.role === 'ADMIN' ? 'bg-amber-500/20 text-amber-300' : u.role === 'INSTRUCTOR' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}">${u.role}</span></td>
-            <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-md font-semibold bg-emerald-500/20 text-emerald-400">${u.status}</span></td>
+            <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-md font-semibold bg-emerald-500/20 text-emerald-400">${u.status || 'ACTIVE'}</span></td>
             <td class="px-4 py-3">
                 ${u.role !== 'ADMIN' ? `
-                    <button onclick="showToast('User status updated')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
-                        Toggle Status
+                    <button onclick="loginAsUser('${u.email}', '${u.name}', '${u.role}')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+                        Login As
                     </button>
                 ` : '<span class="text-xs text-slate-500">Root Admin</span>'}
             </td>

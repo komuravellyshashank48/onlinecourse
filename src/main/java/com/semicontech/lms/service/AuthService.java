@@ -7,20 +7,28 @@ import com.semicontech.lms.dto.RegisterRequest;
 import com.semicontech.lms.entity.User;
 import com.semicontech.lms.exception.BadRequestException;
 import com.semicontech.lms.exception.ResourceNotFoundException;
+import com.semicontech.lms.repository.EnrollmentRepository;
 import com.semicontech.lms.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(UserRepository userRepository, EnrollmentRepository enrollmentRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
+        this.enrollmentRepository = enrollmentRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -88,5 +96,22 @@ public class AuthService {
         User user = getCurrentUser(email);
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+    }
+
+    public List<Map<String, Object>> getPublicUserDirectory() {
+        return userRepository.findAll().stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", u.getId());
+            map.put("name", u.getName());
+            map.put("email", u.getEmail());
+            map.put("role", u.getRole() != null ? u.getRole().replace("ROLE_", "") : "STUDENT");
+            map.put("title", u.getTitle());
+            map.put("status", u.getStatus());
+            map.put("avatarUrl", u.getAvatarUrl());
+            map.put("createdAt", u.getCreatedAt());
+            long count = enrollmentRepository.countByStudentAndStatus(u, "ACTIVE") + enrollmentRepository.countByStudentAndStatus(u, "COMPLETED");
+            map.put("enrolledCount", count);
+            return map;
+        }).collect(Collectors.toList());
     }
 }

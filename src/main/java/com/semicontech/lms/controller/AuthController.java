@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -53,5 +54,11 @@ public class AuthController {
                                                              @RequestBody Map<String, String> body) {
         authService.resetPassword(email, body.get("newPassword"));
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully", "OK"));
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getRegisteredUsers() {
+        List<Map<String, Object>> users = authService.getPublicUserDirectory();
+        return ResponseEntity.ok(ApiResponse.success(users));
     }
 }

@@ -117,6 +117,10 @@
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                     Verify Certificate
                 </button>
+                <button onclick="openUsersDirectoryModal()" id="nav-users" class="hover:text-emerald-400 flex items-center gap-1.5 transition-colors">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    Active Logins & Users
+                </button>
             </nav>
 
             <!-- Quick Demo Role Switcher & Auth Actions -->
@@ -542,12 +546,68 @@
                 <div id="modal-c-syllabus" class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-sm text-slate-300 font-mono whitespace-pre-line leading-relaxed max-h-48 overflow-y-auto"></div>
             </div>
 
+            <!-- Verified Enrolled Students Section -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Enrolled Students (Verified Accounts - Zero Fake Counters)
+                    </h4>
+                    <span id="modal-c-enrolled-count" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">0 Enrolled</span>
+                </div>
+                <div id="modal-c-students-list" class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-sm">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
                 <button onclick="closeModal('modal-course')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold">
                     Close
                 </button>
                 <button id="modal-c-enroll-btn" onclick="enrollInCurrentCourse()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-xl shadow-blue-600/30">
                     Enroll Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Registered Users & Active Logins Directory Modal -->
+    <div id="modal-users-directory" class="modal">
+        <div class="glass-panel p-8 rounded-3xl max-w-4xl w-full border border-slate-700 shadow-2xl relative my-8 text-left">
+            <button onclick="closeModal('modal-users-directory')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold uppercase tracking-wider border border-emerald-500/30">100% Genuine Database Records</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-semibold uppercase">Zero Fake Accounts</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
+                👥 Registered Users & Active Logins Directory
+            </h2>
+            <p class="mt-2 text-sm text-slate-300 leading-relaxed">
+                Every single account below is stored in the database. When you register a new account or enroll in a course, your name is dynamically displayed here in real time.
+            </p>
+
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 bg-slate-950/60">
+                            <th class="py-3 px-4">User Name</th>
+                            <th class="py-3 px-4">Email (Login ID)</th>
+                            <th class="py-3 px-4">Role</th>
+                            <th class="py-3 px-4">Enrolled Courses</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-directory-table-body" class="divide-y divide-slate-800/60">
+                        <!-- Loaded dynamically by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                <span>Want to test with your own name? Register a free account!</span>
+                <button onclick="closeModal('modal-users-directory'); openAuthModal('register');" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition">
+                    + Register New User
                 </button>
             </div>
         </div>

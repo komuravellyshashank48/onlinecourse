@@ -2,6 +2,7 @@ package com.semicontech.lms.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CourseDto {
     private Long id;
@@ -20,10 +21,14 @@ public class CourseDto {
     private String instructorTitle;
     private long totalLessons;
     private long totalStudents;
+    private List<String> enrolledStudentNames = new java.util.ArrayList<>();
     private Double averageRating;
     private LocalDateTime createdAt;
 
     public CourseDto() {}
+
+    public List<String> getEnrolledStudentNames() { return enrolledStudentNames; }
+    public void setEnrolledStudentNames(List<String> enrolledStudentNames) { this.enrolledStudentNames = enrolledStudentNames; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

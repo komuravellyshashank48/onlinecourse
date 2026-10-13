@@ -133,7 +133,12 @@ public class CourseService {
         }
 
         dto.setTotalLessons(lessonRepository.countByCourse(course));
-        dto.setTotalStudents(enrollmentRepository.countByCourse(course));
+        List<com.semicontech.lms.entity.Enrollment> enrollments = enrollmentRepository.findByCourseOrderByEnrolledAtDesc(course);
+        List<String> studentNames = enrollments.stream()
+                .map(e -> e.getStudent().getName())
+                .collect(Collectors.toList());
+        dto.setEnrolledStudentNames(studentNames);
+        dto.setTotalStudents(studentNames.size());
         Double avgRating = reviewRepository.getAverageRatingForCourse(course);
         dto.setAverageRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 4.8);
 
