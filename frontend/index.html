@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SemiconTech Academy | Online Course Management System</title>
+    <!-- Tailwind CSS CDN with Fallback -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 900: '#070a13', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Base Fallback Styles */
+        body {
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .certificate-border {
+            border: 8px double #d97706;
+            background: radial-gradient(circle at center, #ffffff 0%, #fef3c7 100%);
+            color: #1e293b;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .hidden-view {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 hidden items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium bg-emerald-600 text-white transition-all transform animate-bounce">
+        <span id="toast-message">Notification</span>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('home')">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 flex items-center justify-center shadow-lg shadow-blue-500/20 border border-blue-400/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="9" y="9" width="6" height="6" stroke-width="2"/>
+                        <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        Semicon<span class="text-blue-400">Tech</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest font-semibold">Academy</span>
+                    </span>
+                    <p class="text-xs text-slate-400">VLSI &bull; Semiconductor &bull; Systems Software</p>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <button onclick="filterCategory('All')" id="nav-all" class="hover:text-blue-400 transition-colors text-blue-400 font-semibold">
+                    All Courses
+                </button>
+                <button onclick="filterCategory('VLSI and Semiconductor Design')" id="nav-vlsi" class="hover:text-blue-400 transition-colors">
+                    VLSI & Semiconductors
+                </button>
+                <button onclick="filterCategory('Programming and Computer Science')" id="nav-cs" class="hover:text-blue-400 transition-colors">
+                    Programming & CS
+                </button>
+                <button onclick="switchView('verify-cert')" id="nav-verify" class="hover:text-amber-400 flex items-center gap-1.5 transition-colors">
+                    <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    Verify Certificate
+                </button>
+                <button onclick="openUsersDirectoryModal()" id="nav-users" class="hover:text-emerald-400 flex items-center gap-1.5 transition-colors">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    Active Logins & Users
+                </button>
+            </nav>
+
+            <!-- Quick Demo Role Switcher & Auth Actions -->
+            <div class="flex items-center gap-3">
+                <!-- 1-Click Role Switcher -->
+                <div class="hidden lg:flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-xs">
+                    <span class="text-slate-400 px-2 font-medium">Quick Demo:</span>
+                    <button onclick="quickLogin('student')" class="px-2.5 py-1.5 rounded-lg bg-blue-600/20 text-blue-300 hover:bg-blue-600/40 border border-blue-500/30 transition">
+                        👨🎓 Student (Rahul)
+                    </button>
+                    <button onclick="quickLogin('instructor')" class="px-2.5 py-1.5 rounded-lg bg-purple-600/20 text-purple-300 hover:bg-purple-600/40 border border-purple-500/30 transition">
+                        👨🏫 Instructor (Dr. Vikram)
+                    </button>
+                    <button onclick="quickLogin('admin')" class="px-2.5 py-1.5 rounded-lg bg-amber-600/20 text-amber-300 hover:bg-amber-600/40 border border-amber-500/30 transition">
+                        👨💼 Admin
+                    </button>
+                </div>
+
+                <!-- User Profile or Login Buttons -->
+                <div id="nav-user-container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1">
+
+        <!-- 1. HOME VIEW (Course Catalog & Hero) -->
+        <div id="view-home">
+            <!-- Hero Section -->
+            <section class="relative overflow-hidden pt-12 pb-16 border-b border-slate-800/60">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-6">
+                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+                        Autonomous Silicon & Software Engineering Curriculum
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+                        Master <span class="gradient-text">VLSI, Semiconductor Design</span> & Systems Software
+                    </h1>
+                    <p class="mt-5 text-base sm:text-lg text-slate-300 max-w-3xl mx-auto font-light leading-relaxed">
+                        Industry-grade training in Verilog RTL, SystemVerilog UVM, Physical Design, Static Timing Analysis (STA), C, and Advanced Data Structures taught by silicon architects with 18+ years of tapeout experience.
+                    </p>
+
+                    <!-- Search Bar -->
+                    <div class="mt-8 max-w-2xl mx-auto flex items-center p-2 rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl">
+                        <svg class="w-6 h-6 text-slate-400 ml-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <input 
+                            type="text" 
+                            id="search-input"
+                            oninput="handleSearch(this.value)"
+                            placeholder="Search Verilog, UVM, Physical Design, STA, Java, C..." 
+                            class="w-full bg-transparent border-0 text-white placeholder-slate-400 focus:outline-none text-sm"
+                        />
+                    </div>
+
+                    <!-- 4 Highlights -->
+                    <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto text-center">
+                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <div class="text-2xl font-bold text-blue-400">13 Modules</div>
+                            <div class="text-xs text-slate-400 mt-1">VLSI & CS Specializations</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <div class="text-2xl font-bold text-purple-400">18+ Years</div>
+                            <div class="text-xs text-slate-400 mt-1">Ex-Intel / Qualcomm Faculty</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <div class="text-2xl font-bold text-amber-400">100% Verifiable</div>
+                            <div class="text-xs text-slate-400 mt-1">Industry Certificates</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+                            <div class="text-2xl font-bold text-emerald-400">Zero Setup</div>
+                            <div class="text-xs text-slate-400 mt-1">Interactive Code & Quiz Labs</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Course Catalog -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <!-- Category Filter Tabs -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                    <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0" id="category-tabs">
+                        <button onclick="filterCategory('All')" id="tab-all" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-600 text-white shadow-lg shadow-blue-600/30">
+                            All Technical Courses (13)
+                        </button>
+                        <button onclick="filterCategory('VLSI and Semiconductor Design')" id="tab-vlsi" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+                            VLSI & Semiconductor Design (9)
+                        </button>
+                        <button onclick="filterCategory('Programming and Computer Science')" id="tab-cs" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white border border-slate-800">
+                            Programming & CS (4)
+                        </button>
+                    </div>
+
+                    <!-- Level Filters & Insert Course Button -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5 text-xs text-slate-400">
+                            <span>Level:</span>
+                            <button onclick="filterLevel('ALL')" id="lvl-ALL" class="px-2.5 py-1 rounded-lg bg-slate-700 text-white font-medium">ALL</button>
+                            <button onclick="filterLevel('BEGINNER')" id="lvl-BEGINNER" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">BEGINNER</button>
+                            <button onclick="filterLevel('INTERMEDIATE')" id="lvl-INTERMEDIATE" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">INTERMEDIATE</button>
+                            <button onclick="filterLevel('ADVANCED')" id="lvl-ADVANCED" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">ADVANCED</button>
+                        </div>
+                        <button onclick="openModal('modal-add-course')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 transition">
+                            ➕ Insert New Course
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Course Cards Grid -->
+                <div id="course-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Loaded dynamically by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- 2. STUDENT DASHBOARD VIEW -->
+        <div id="view-student" class="hidden-view max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Welcome Banner -->
+            <div class="p-8 rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/40 border border-blue-500/20 backdrop-blur-md mb-8">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-widest text-blue-400 mb-1">Student Portal</div>
+                        <h2 class="text-3xl font-extrabold text-white">Welcome back, <span id="student-name">Rahul</span>! 👋</h2>
+                        <p class="text-sm text-slate-300 mt-2 max-w-xl">
+                            Track your enrolled courses, complete interactive lessons, test your skills with quizzes, and earn verifiable completion certificates.
+                        </p>
+                    </div>
+                    <button onclick="switchView('home')" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition">
+                        Browse More Courses
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4 Dashboard Metric Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Enrolled Courses</div>
+                    <div id="stat-enrolled" class="text-4xl font-extrabold text-white mt-2">4</div>
+                    <div class="text-xs text-blue-400 mt-2 font-medium">All registered tracks</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Courses In Progress</div>
+                    <div id="stat-inprogress" class="text-4xl font-extrabold text-amber-400 mt-2">2</div>
+                    <div class="text-xs text-amber-400/80 mt-2 font-medium">Active modules</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Completed Courses</div>
+                    <div id="stat-completed" class="text-4xl font-extrabold text-emerald-400 mt-2">2</div>
+                    <div class="text-xs text-emerald-400/80 mt-2 font-medium">Certificates earned</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Overall Progress</div>
+                    <div id="stat-progress" class="text-4xl font-extrabold text-purple-400 mt-2">81%</div>
+                    <div class="text-xs text-purple-400/80 mt-2 font-medium">Curriculum mastery</div>
+                </div>
+            </div>
+
+            <!-- My Learning List -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <h3 class="text-xl font-bold text-white mb-6">My Learning & Progress</h3>
+                    <div id="student-learning-list" class="space-y-4">
+                        <!-- Loaded dynamically by JS -->
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-6">Recent Activities</h3>
+                    <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4 text-xs">
+                        <div class="flex items-start gap-3 pb-3 border-b border-slate-800">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mt-1 shrink-0"></span>
+                            <div>
+                                <div class="font-medium text-slate-200">Studied lesson in Java Programming</div>
+                                <div class="text-slate-500 mt-0.5">10 mins ago</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 pb-3 border-b border-slate-800">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
+                            <div>
+                                <div class="font-medium text-slate-200">Earned Certificate in Verilog HDL and RTL Design</div>
+                                <div class="text-slate-500 mt-0.5">Yesterday</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500 mt-1 shrink-0"></span>
+                            <div>
+                                <div class="font-medium text-slate-200">Completed quiz assessment with Distinction</div>
+                                <div class="text-slate-500 mt-0.5">2 days ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. INSTRUCTOR DASHBOARD VIEW -->
+        <div id="view-instructor" class="hidden-view max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-widest text-purple-400">Instructor Portal</span>
+                    <h2 class="text-3xl font-extrabold text-white">Course Faculty Dashboard</h2>
+                    <p class="text-sm text-slate-400 mt-1">Manage assigned technical modules, upload lessons, review quizzes, and track enrolled students.</p>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Courses Taught</div>
+                    <div class="text-3xl font-extrabold text-purple-400 mt-2">5</div>
+                    <div class="text-xs text-slate-500 mt-1">Active technical tracks</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Enrolled Students</div>
+                    <div class="text-3xl font-extrabold text-blue-400 mt-2">128</div>
+                    <div class="text-xs text-slate-500 mt-1">Under faculty mentorship</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Instructor Rating</div>
+                    <div class="text-3xl font-extrabold text-amber-400 mt-2">4.9 ★</div>
+                    <div class="text-xs text-slate-500 mt-1">Student feedback average</div>
+                </div>
+            </div>
+
+            <!-- Instructor Courses Table -->
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                <h3 class="text-lg font-bold text-white mb-4">Assigned Curriculum</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">Course Title</th>
+                                <th class="px-4 py-3">Category</th>
+                                <th class="px-4 py-3">Level</th>
+                                <th class="px-4 py-3">Duration</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="instructor-courses-table" class="divide-y divide-slate-800/60">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ADMIN DASHBOARD VIEW -->
+        <div id="view-admin" class="hidden-view max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="mb-8">
+                <span class="text-xs font-semibold uppercase tracking-widest text-amber-400">Administration Console</span>
+                <h2 class="text-3xl font-extrabold text-white">Platform Governance & Oversight</h2>
+                <p class="text-sm text-slate-400 mt-1">Supervise students, instructors, courses, and platform operations.</p>
+            </div>
+
+            <!-- Admin KPIs -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Students</div>
+                    <div class="text-3xl font-extrabold text-blue-400 mt-2">250+</div>
+                    <div class="text-xs text-slate-500 mt-1">Registered learners</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Instructors</div>
+                    <div class="text-3xl font-extrabold text-purple-400 mt-2">15</div>
+                    <div class="text-xs text-slate-500 mt-1">Silicon architects</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Courses</div>
+                    <div class="text-3xl font-extrabold text-amber-400 mt-2">13</div>
+                    <div class="text-xs text-slate-500 mt-1">13 Published</div>
+                </div>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Enrollments</div>
+                    <div class="text-3xl font-extrabold text-emerald-400 mt-2">600+</div>
+                    <div class="text-xs text-slate-500 mt-1">Active student seats</div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 mb-8">
+                <h3 class="text-lg font-bold text-white mb-4">User Management (Students & Faculty)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-950/60 border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3">Name</th>
+                                <th class="px-4 py-3">Email</th>
+                                <th class="px-4 py-3">Role</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-table" class="divide-y divide-slate-800/60">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. VERIFY CERTIFICATE PUBLIC VIEW -->
+        <div id="view-verify-cert" class="hidden-view max-w-4xl mx-auto px-4 py-16 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white">Certificate Verification Registry</h2>
+            <p class="mt-2 text-slate-400 text-sm max-w-lg mx-auto">
+                Validate credentials issued by SemiconTech Academy. Enter the certificate code (e.g., <code class="text-amber-400 font-mono">STA-2026-CERT-88412</code>).
+            </p>
+
+            <div class="mt-6 flex items-center max-w-md mx-auto p-2 rounded-2xl bg-slate-900 border border-slate-700 shadow-xl">
+                <input 
+                    type="text"
+                    id="verify-input"
+                    placeholder="STA-2026-CERT-88412"
+                    class="w-full bg-transparent border-0 px-4 text-white uppercase tracking-wider font-mono text-sm focus:outline-none"
+                />
+                <button 
+                    onclick="handleVerifyLookup()"
+                    class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition"
+                >
+                    Verify
+                </button>
+            </div>
+
+            <div id="verify-result" class="mt-8 max-w-lg mx-auto">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODALS -->
+
+    <!-- 1. Auth Modal (Sign In & Register) -->
+    <div id="modal-auth" class="modal">
+        <div class="glass-panel p-8 rounded-3xl max-w-md w-full border border-slate-700 shadow-2xl relative">
+            <button onclick="closeModal('modal-auth')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            
+            <!-- Auth Tab Switcher -->
+            <div class="flex items-center gap-2 p-1 bg-slate-950 rounded-2xl border border-slate-800 mb-6">
+                <button type="button" id="auth-tab-login" onclick="setAuthTab('login')" class="flex-1 py-2 rounded-xl text-xs font-bold transition bg-blue-600 text-white shadow-lg shadow-blue-600/30">
+                    Sign In
+                </button>
+                <button type="button" id="auth-tab-register" onclick="setAuthTab('register')" class="flex-1 py-2 rounded-xl text-xs font-bold transition text-slate-400 hover:text-white">
+                    Register New Account
+                </button>
+            </div>
+
+            <!-- Notice when triggered by Enroll button -->
+            <div id="auth-enroll-notice" class="hidden p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs mb-4">
+                👋 Please log in or create an account to enroll in this course.
+            </div>
+
+            <h3 class="text-2xl font-bold text-white text-center mb-1" id="auth-title">Sign In</h3>
+            <p class="text-xs text-slate-400 text-center mb-6" id="auth-subtitle">Access your personalized learning dashboard</p>
+
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <!-- Registration Full Name -->
+                <div id="auth-name-container" class="hidden">
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Full Name</label>
+                    <input id="auth-name" type="text" placeholder="e.g. Amit Kumar / Sarah Connor" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <!-- Registration Role Selector -->
+                <div id="auth-role-container" class="hidden">
+                    <label class="text-xs font-medium text-slate-300 block mb-1">I am registering as</label>
+                    <select id="auth-role" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <option value="ROLE_STUDENT">👨🎓 Student / Learner</option>
+                        <option value="ROLE_INSTRUCTOR">👨🏫 Course Instructor / Faculty</option>
+                    </select>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Email Address</label>
+                    <input id="auth-email" type="email" required placeholder="name@example.com" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Password</label>
+                    <input id="auth-password" type="password" required placeholder="Enter password (min 6 chars)" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Quick Demo Helper in Modal -->
+            <div class="mt-6 pt-4 border-t border-slate-800 text-center">
+                <div class="text-[11px] text-slate-500 mb-2 font-medium">Or log in instantly with demo accounts:</div>
+                <div class="flex items-center justify-center gap-2 text-xs">
+                    <button type="button" onclick="fillDemo('rahul')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-300">Rahul (Student)</button>
+                    <button type="button" onclick="fillDemo('vikram')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-300">Dr. Vikram</button>
+                    <button type="button" onclick="fillDemo('admin')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300">Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Course Details Modal -->
+    <div id="modal-course" class="modal">
+        <div class="glass-panel p-8 rounded-3xl max-w-3xl w-full border border-slate-700 shadow-2xl relative my-8 text-left">
+            <button onclick="closeModal('modal-course')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-2">
+                <span id="modal-c-category" class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-semibold uppercase"></span>
+                <span id="modal-c-level" class="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 font-semibold uppercase"></span>
+            </div>
+            <h2 id="modal-c-title" class="text-2xl sm:text-3xl font-extrabold text-white"></h2>
+            <p id="modal-c-desc" class="mt-3 text-sm text-slate-300 leading-relaxed"></p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs">
+                <div><strong class="text-slate-400 block">Duration</strong><span id="modal-c-duration"></span></div>
+                <div><strong class="text-slate-400 block">Instructor</strong><span id="modal-c-instructor"></span></div>
+                <div><strong class="text-slate-400 block">Course Fee</strong><span id="modal-c-price"></span></div>
+                <div><strong class="text-slate-400 block">Rating</strong><span id="modal-c-rating"></span> ★</div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Course Syllabus</h4>
+                <div id="modal-c-syllabus" class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-sm text-slate-300 font-mono whitespace-pre-line leading-relaxed max-h-48 overflow-y-auto"></div>
+            </div>
+
+            <!-- Verified Enrolled Students Section -->
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Enrolled Students (Verified Accounts - Zero Fake Counters)
+                    </h4>
+                    <span id="modal-c-enrolled-count" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">0 Enrolled</span>
+                </div>
+                <div id="modal-c-students-list" class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-sm">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button onclick="closeModal('modal-course')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold">
+                    Close
+                </button>
+                <button id="modal-c-enroll-btn" onclick="enrollInCurrentCourse()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-xl shadow-blue-600/30">
+                    Enroll Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real Registered Users & Active Logins Directory Modal -->
+    <div id="modal-users-directory" class="modal">
+        <div class="glass-panel p-8 rounded-3xl max-w-4xl w-full border border-slate-700 shadow-2xl relative my-8 text-left">
+            <button onclick="closeModal('modal-users-directory')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold uppercase tracking-wider border border-emerald-500/30">100% Genuine Database Records</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-semibold uppercase">Zero Fake Accounts</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
+                👥 Registered Users & Active Logins Directory
+            </h2>
+            <p class="mt-2 text-sm text-slate-300 leading-relaxed">
+                Every single account below is stored in the database. When you register a new account or enroll in a course, your name is dynamically displayed here in real time.
+            </p>
+
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 bg-slate-950/60">
+                            <th class="py-3 px-4">User Name</th>
+                            <th class="py-3 px-4">Email (Login ID)</th>
+                            <th class="py-3 px-4">Role</th>
+                            <th class="py-3 px-4">Enrolled Courses</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-directory-table-body" class="divide-y divide-slate-800/60">
+                        <!-- Loaded dynamically by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                <span>Want to test with your own name? Register a free account!</span>
+                <button onclick="closeModal('modal-users-directory'); openAuthModal('register');" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition">
+                    + Register New User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Insert / Add New Course Modal -->
+    <div id="modal-add-course" class="modal">
+        <div class="glass-panel p-8 rounded-3xl max-w-2xl w-full border border-slate-700 shadow-2xl relative my-8 text-left">
+            <button onclick="closeModal('modal-add-course')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold uppercase tracking-wider border border-emerald-500/30">Course Creator</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-semibold uppercase">Instant Database Insert</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white">➕ Insert New Technical Course</h2>
+            <p class="mt-1 text-xs text-slate-400">Fill out the details below to add a brand new course to the catalog.</p>
+
+            <form id="add-course-form" onsubmit="handleCreateCourse(event)" class="mt-6 space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Course Title *</label>
+                    <input id="new-course-title" type="text" required placeholder="e.g. RISC-V Microarchitecture & Core Design" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Category *</label>
+                        <select id="new-course-category" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500">
+                            <option value="VLSI and Semiconductor Design">VLSI and Semiconductor Design</option>
+                            <option value="Programming and Computer Science">Programming and Computer Science</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Level *</label>
+                        <select id="new-course-level" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500">
+                            <option value="BEGINNER">BEGINNER</option>
+                            <option value="INTERMEDIATE">INTERMEDIATE</option>
+                            <option value="ADVANCED">ADVANCED</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Duration *</label>
+                        <input id="new-course-duration" type="text" required placeholder="e.g. 10 Weeks (50 Hours)" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-slate-300 block mb-1">Course Fee (₹) *</label>
+                        <input id="new-course-price" type="number" required placeholder="e.g. 4999" value="4999" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Description *</label>
+                    <textarea id="new-course-desc" rows="2" required placeholder="Comprehensive course description..." class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-1">Syllabus / Modules *</label>
+                    <textarea id="new-course-syllabus" rows="3" required placeholder="1. Introduction&#10;2. Architecture Modeling&#10;3. Pipeline Design" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm font-mono focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeModal('modal-add-course')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-lg shadow-emerald-600/30 transition">
+                        Insert Course Now
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Lesson Player Modal -->
+    <div id="modal-lesson" class="modal">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <span id="player-course-title" class="text-xs text-blue-400 font-semibold"></span>
+                    <h3 id="player-lesson-title" class="text-lg font-bold text-white"></h3>
+                </div>
+                <button onclick="closeModal('modal-lesson')" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+                <!-- Syllabus Sidebar -->
+                <div class="w-full md:w-72 border-r border-slate-800 bg-slate-950/40 p-4 overflow-y-auto" id="player-lesson-list">
+                    <!-- Populated by JS -->
+                </div>
+                <!-- Main Player -->
+                <div class="flex-1 p-6 overflow-y-auto space-y-6">
+                    <div id="player-container" class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl relative">
+                        <!-- Custom Academy Player Cover: Conceals raw YouTube thumbnail and cleanly specifies the technical video stream -->
+                        <div id="player-cover" class="absolute inset-0 z-20 flex flex-col justify-between p-6 md:p-8 bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 text-white select-none transition-all duration-300">
+                            <!-- Top Stream Specification Badge -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[11px] font-mono font-bold tracking-wider uppercase flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                                        HD Technical Lecture
+                                    </span>
+                                    <span id="player-cover-spec" class="px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-300 text-[11px] font-mono border border-slate-700/60">
+                                        Specified Stream: <span id="player-cover-vidid" class="text-emerald-400 font-bold">jvbnKrIQpwo</span>
+                                    </span>
+                                </div>
+                                <span class="text-xs text-slate-400 font-mono hidden sm:inline-block">1080p 60FPS &bull; Verified Feed</span>
+                            </div>
+
+                            <!-- Center Play Button & Title -->
+                            <div class="text-center my-auto flex flex-col items-center justify-center py-4">
+                                <button onclick="startLessonVideo()" class="relative flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-2xl shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer mb-4 group">
+                                    <div class="absolute inset-0 rounded-full border-2 border-blue-400/40 animate-ping"></div>
+                                    <svg class="w-8 h-8 fill-current ml-1 text-white" viewBox="0 0 24 24">
+                                        <polygon points="6,3 20,12 6,21" />
+                                    </svg>
+                                </button>
+                                <h4 id="player-cover-title" class="text-lg md:text-2xl font-bold text-white max-w-xl line-clamp-2 drop-shadow">Module Lecture Stream</h4>
+                                <p id="player-cover-desc" class="text-xs text-slate-400 mt-1.5 max-w-md">Click above to play the embedded technical lecture. Clean stream without external video recommendations.</p>
+                            </div>
+
+                            <!-- Bottom Bar Specification -->
+                            <div class="flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+                                <span id="player-cover-duration" class="font-mono text-blue-300">⏱ Duration: 40 Mins</span>
+                                <span class="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                    Embedded Stream Specified: YouTube CDN
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Embedded Stream Iframe (Shown cleanly when user presses Play) -->
+                        <iframe id="player-video" class="w-full h-full" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <span id="player-duration-badge" class="px-3 py-1 rounded-lg bg-slate-800 text-xs font-mono text-blue-400">⏱ 45 Mins</span>
+                            <button onclick="resetLessonCover()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-mono border border-slate-700 transition" title="Restore custom player cover">
+                                ↺ Reset Cover
+                            </button>
+                            <a id="player-yt-link" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 text-xs font-medium border border-red-500/30 transition">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                Direct Video Link
+                            </a>
+                        </div>
+                        <button id="player-complete-btn" onclick="completeCurrentLesson()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 transition">
+                            Mark as Completed
+                        </button>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Technical Lecture Notes & Code Snippets</h4>
+                        <div id="player-notes" class="p-6 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 text-sm font-mono whitespace-pre-wrap leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Interactive Quiz Modal -->
+    <div id="modal-quiz" class="modal">
+        <div class="glass-panel p-8 rounded-3xl max-w-2xl w-full border border-slate-700 shadow-2xl relative my-8">
+            <button onclick="closeModal('modal-quiz')" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            <div class="text-xs font-semibold uppercase tracking-wider text-purple-400 mb-1">Knowledge Assessment</div>
+            <h3 id="quiz-modal-title" class="text-2xl font-bold text-white"></h3>
+            <p class="text-xs text-slate-400 mt-1">Pass Mark: 70% &bull; Instant Automatic Scoring</p>
+
+            <div id="quiz-question-container" class="mt-6 space-y-6">
+                <!-- Questions or Results loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Certificate Modal -->
+    <div id="modal-cert" class="modal">
+        <div class="max-w-4xl w-full my-6">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs text-amber-400 font-semibold uppercase tracking-widest">Accredited Certificate of Achievement</span>
+                <div class="flex items-center gap-3">
+                    <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition">
+                        Print / Save as PDF
+                    </button>
+                    <button onclick="closeModal('modal-cert')" class="text-slate-400 hover:text-white text-2xl font-bold px-2">&times;</button>
+                </div>
+            </div>
+
+            <div id="printable-certificate" class="certificate-border rounded-2xl p-12 text-center shadow-2xl relative overflow-hidden">
+                <div class="text-xs font-bold uppercase tracking-[0.3em] text-amber-800">
+                    SemiconTech Academy of Silicon & Software Engineering
+                </div>
+                <h1 class="text-4xl font-serif font-extrabold text-slate-900 mt-4 tracking-wide">
+                    CERTIFICATE OF COMPLETION
+                </h1>
+                <p class="text-xs uppercase tracking-widest text-slate-600 mt-2">This is to certify that</p>
+                <div id="cert-student-name" class="text-3xl font-serif font-bold text-blue-900 my-4 border-b-2 border-amber-600/40 pb-2 inline-block px-12">
+                    Rahul Sharma
+                </div>
+                <p class="text-sm text-slate-700 max-w-xl mx-auto leading-relaxed">
+                    has successfully satisfied all curriculum requirements, laboratory evaluations, and technical quizzes in
+                </p>
+                <h2 id="cert-course-title" class="text-2xl font-bold text-slate-900 my-4">
+                    Verilog HDL and RTL Design
+                </h2>
+                <div class="inline-block px-4 py-1.5 rounded-full bg-amber-100 border border-amber-400 text-amber-900 text-xs font-bold uppercase tracking-wider mb-8">
+                    Grade: Distinction with Honors
+                </div>
+                <div class="mt-8 pt-8 border-t border-slate-300 grid grid-cols-3 items-end text-xs text-slate-700">
+                    <div>
+                        <div class="font-serif italic text-lg text-slate-900">Dr. Vikram Raman</div>
+                        <div class="border-t border-slate-400 mt-1 pt-1 font-semibold">Lead Faculty & Silicon Architect</div>
+                    </div>
+                    <div>
+                        <div class="w-16 h-16 rounded-full border-2 border-amber-600 mx-auto flex items-center justify-center text-[9px] font-bold text-amber-800 uppercase tracking-tighter">
+                            STA SEAL 2026
+                        </div>
+                    </div>
+                    <div>
+                        <div class="font-serif italic text-lg text-slate-900">Dr. Elena Rostova</div>
+                        <div class="border-t border-slate-400 mt-1 pt-1 font-semibold">Chief Academic Officer</div>
+                    </div>
+                </div>
+                <div class="mt-8 text-[11px] text-slate-500 font-mono">
+                    Certificate ID: <strong id="cert-code" class="text-slate-800">STA-2026-CERT-88412</strong> &bull; Issue Date: October 2026
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800/80 bg-slate-950 py-8 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-white">SemiconTech Academy</span>
+                <span>&bull; Full Stack Java Spring Boot & MySQL LMS</span>
+            </div>
+            <div class="text-slate-500">
+                13 Technical Programs in VLSI, RTL, Physical Design, STA, C, Java, and Systems Software.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Native App Script (Fast, Reliable, Zero CDN Compilation Hurdles) -->
+    <script src="js/app.js"></script>
+</body>
+</html>

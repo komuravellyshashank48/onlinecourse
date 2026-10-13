@@ -1,7 +1,9 @@
 // SemiconTech Academy - Core Application Script
 // Pure, blazing fast modern JavaScript (Zero CDN compilation delay, Zero black screens)
-
-const API_BASE = '/api';
+// Smart API URL: Points to local Spring Boot backend if frontend is hosted on a separate port/origin
+const API_BASE = (window.location.port === '8080' || (window.location.protocol === 'https:' && window.location.port === ''))
+    ? '/api'
+    : 'http://localhost:8080/api';
 
 // Pre-seeded Course Data
 let ALL_COURSES = [
